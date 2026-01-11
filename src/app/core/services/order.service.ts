@@ -97,15 +97,17 @@ export class OrderService {
             .eq(isUuid ? 'id' : 'number', tableId)
             .single();
 
-        console.log(`[OrderService] Getting active items for table: ${tableId}`);
+        const resolvedTableId = tableData?.id || tableId;
+        console.log(`[OrderService] Getting active items for table: ${resolvedTableId}`);
+
         if (tableError || !tableData?.current_session_id) {
-            console.warn(`[OrderService] Table ${tableId} has no current_session_id in DB.`);
+            console.warn(`[OrderService] Table ${tableId} has no current_session_id in DB. Using fallback for table UUID: ${resolvedTableId}`);
 
             // Fallback: look for latest pending orders for this table if session is missing
             const { data: fallbackOrders, error: fbError } = await this.supabase.client
                 .from('orders')
                 .select('id, status, created_at')
-                .eq('table_id', tableId)
+                .eq('table_id', resolvedTableId)
                 .neq('status', 'cancelled')
                 .neq('status', 'paid')
                 .order('created_at', { ascending: false })
@@ -122,7 +124,7 @@ export class OrderService {
         const { data: orders, error: ordersError } = await this.supabase.client
             .from('orders')
             .select('id, created_at, status')
-            .eq('table_id', tableId)
+            .eq('table_id', resolvedTableId)
             .eq('session_id', tableData.current_session_id)
             .neq('status', 'cancelled');
 
