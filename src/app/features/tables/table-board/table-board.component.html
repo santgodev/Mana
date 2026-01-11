@@ -41,12 +41,12 @@
 
         <div class="main-actions">
           <button mat-raised-button color="primary" class="coffee-btn" (click)="openCreateTableDialog()"
-            *ngIf="selectedZone">
+            *ngIf="selectedZone && !(isHandset$ | async)">
             <mat-icon>add</mat-icon>
             <span class="d-none d-sm-inline">Nueva Mesa</span>
           </button>
 
-          <button mat-stroked-button class="coffee-btn" (click)="toggleEditMode()">
+          <button *ngIf="!(isHandset$ | async)" mat-stroked-button class="coffee-btn" (click)="toggleEditMode()">
             <mat-icon>{{ isEditMode ? 'check' : 'edit_location' }}</mat-icon>
             <span class="d-none d-sm-inline">{{ isEditMode ? 'Guardar' : 'Editar' }}</span>
           </button>

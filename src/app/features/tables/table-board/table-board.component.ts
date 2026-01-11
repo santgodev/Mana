@@ -15,6 +15,10 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
+import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
+import { Observable } from 'rxjs';
+import { map, shareReplay } from 'rxjs/operators';
+
 
 // Services
 import { TableService } from '../../../core/services/table.service';
@@ -70,6 +74,7 @@ export class TableBoardComponent implements OnInit, OnDestroy {
   timerInterval: any;
   now: number = Date.now();
 
+  isHandset$: Observable<boolean>;
   private subscriptions: Subscription[] = [];
 
   constructor(
@@ -78,8 +83,15 @@ export class TableBoardComponent implements OnInit, OnDestroy {
     private tableService: TableService,
     private zoneService: ZoneService,
     private dialog: MatDialog,
-    private snackBar: MatSnackBar
-  ) { }
+    private snackBar: MatSnackBar,
+    private breakpointObserver: BreakpointObserver
+  ) {
+    this.isHandset$ = this.breakpointObserver.observe([Breakpoints.Handset])
+      .pipe(
+        map(result => result.matches),
+        shareReplay()
+      );
+  }
 
   ngOnInit(): void {
     // 1. Subscribe to params to handle navigation changes
