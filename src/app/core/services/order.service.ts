@@ -61,6 +61,7 @@ export class OrderService {
         if (!orderData) throw new Error('Order creation failed returning no data');
 
         const orderId = orderData.id;
+        console.log(`[OrderService] Order created: ${orderId} for session: ${pSessionId}`);
 
         // 3. Create Order Items
         const itemsToInsert = cart.map(item => ({
@@ -89,10 +90,11 @@ export class OrderService {
 
     async getActiveOrderItems(tableId: string): Promise<any[]> {
         // 1. Get Table Session
+        const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(tableId);
         const { data: tableData, error: tableError } = await this.supabase.client
             .from('tables')
-            .select('current_session_id')
-            .eq('id', tableId)
+            .select('id, current_session_id')
+            .eq(isUuid ? 'id' : 'number', tableId)
             .single();
 
         console.log(`[OrderService] Getting active items for table: ${tableId}`);
@@ -132,16 +134,18 @@ export class OrderService {
     }
 
     private async fetchItemsByIds(orderIds: string[]): Promise<any[]> {
+        console.log(`[OrderService] Fetching items for orders: ${orderIds.join(', ')}`);
         const { data: items, error: itemsError } = await this.supabase.client
             .from('order_items')
             .select('*, product:products(name, price)')
             .in('order_id', orderIds);
 
         if (itemsError) {
-            console.error('Error fetching stored items:', itemsError);
+            console.error('[OrderService] Error fetching stored items:', itemsError);
             return [];
         }
 
+        console.log(`[OrderService] Fetched ${items?.length || 0} items.`);
         return items || [];
     }
 }
