@@ -95,24 +95,41 @@ export class OrderService {
             .eq('id', tableId)
             .single();
 
-        if (tableError || !tableData?.current_session_id) return [];
+        if (tableError || !tableData?.current_session_id) {
+            console.warn(`Table ${tableId} has no active session. Trying to find latest orders...`);
+            // Fallback: look for latest pending orders for this table if session is missing
+            const { data: fallbackOrders, error: fbError } = await this.supabase.client
+                .from('orders')
+                .select('id')
+                .eq('table_id', tableId)
+                .neq('status', 'cancelled')
+                .neq('status', 'paid')
+                .order('created_at', { ascending: false })
+                .limit(20);
+
+            if (fbError || !fallbackOrders || fallbackOrders.length === 0) return [];
+            const orderIds = fallbackOrders.map(o => o.id);
+            return this.fetchItemsByIds(orderIds);
+        }
 
         // 2. Get Orders for this session
         const { data: orders, error: ordersError } = await this.supabase.client
             .from('orders')
             .select('id, created_at, status')
             .eq('table_id', tableId)
-            .eq('session_id', tableData.current_session_id) // Strict session filtering
-            .neq('status', 'cancelled'); // We might want to show 'paid' if they belong to this session? Usually 'pending'/'delivered'.
+            .eq('session_id', tableData.current_session_id)
+            .neq('status', 'cancelled');
 
         if (ordersError || !orders || orders.length === 0) return [];
 
         const orderIds = orders.map(o => o.id);
+        return this.fetchItemsByIds(orderIds);
+    }
 
-        // 3. Get Items
+    private async fetchItemsByIds(orderIds: string[]): Promise<any[]> {
         const { data: items, error: itemsError } = await this.supabase.client
             .from('order_items')
-            .select('*, product:products(name, price)') // Join product
+            .select('*, product:products(name, price)')
             .in('order_id', orderIds);
 
         if (itemsError) {
