@@ -401,3 +401,26 @@ body {
     display: block !important;
   }
 }
+
+/* Kitchen Board - Dark Panel Override */
+.dark-panel.mat-mdc-select-panel {
+  background: #2a2a2a !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+
+  .mat-mdc-option {
+    background: transparent !important;
+    color: #ffffff !important;
+
+    &:hover:not(.mdc-list-item--disabled) {
+      background: rgba(255, 255, 255, 0.08) !important;
+    }
+
+    &.mdc-list-item--selected:not(.mdc-list-item--disabled) {
+      background: rgba(255, 215, 64, 0.1) !important; // Amber ripple
+
+      .mdc-list-item__primary-text {
+        color: #ffd740 !important; // Material Amber A200
+      }
+    }
+  }
+}
