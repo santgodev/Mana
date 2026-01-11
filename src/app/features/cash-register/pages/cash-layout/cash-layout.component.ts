@@ -8,6 +8,9 @@ import { CashService } from '../../../../core/services/cash.service';
 import { CashShift } from '../../../../models/supabase.types';
 import { CashDashboardComponent } from '../../components/cash-dashboard/cash-dashboard.component';
 import { CashOpeningComponent } from '../../components/cash-opening/cash-opening.component';
+import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
+import { Observable } from 'rxjs';
+import { map, shareReplay } from 'rxjs/operators';
 
 @Component({
   selector: 'app-cash-layout',
@@ -26,7 +29,7 @@ import { CashOpeningComponent } from '../../components/cash-opening/cash-opening
       <!-- Global Header for Cash Module -->
       <div class="cash-header" *ngIf="!isLoading">
         <h1>🧾 Caja Registradora</h1>
-        <button mat-stroked-button routerLink="/caja/history" class="history-btn">
+        <button *ngIf="!(isHandset$ | async)" mat-stroked-button routerLink="/caja/history" class="history-btn">
           <mat-icon>history</mat-icon> Ver Historial
         </button>
       </div>
@@ -113,8 +116,18 @@ import { CashOpeningComponent } from '../../components/cash-opening/cash-opening
 export class CashLayoutComponent implements OnInit {
   currentShift: CashShift | null = null;
   isLoading = true;
+  isHandset$: Observable<boolean>;
 
-  constructor(private cashService: CashService) { }
+  constructor(
+    private cashService: CashService,
+    private breakpointObserver: BreakpointObserver
+  ) {
+    this.isHandset$ = this.breakpointObserver.observe([Breakpoints.Handset])
+      .pipe(
+        map(result => result.matches),
+        shareReplay()
+      );
+  }
 
   ngOnInit(): void {
     this.cashService.currentShift$.subscribe(shift => {
