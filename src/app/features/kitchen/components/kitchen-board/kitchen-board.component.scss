@@ -337,7 +337,7 @@ $primary-blue: #448aff;
         min-height: 50px !important;
 
         .brand {
-            display: none !important; // Absolute hide on tablet/mobile
+            display: none !important;
         }
 
         .station-filter {
@@ -348,27 +348,17 @@ $primary-blue: #448aff;
 
             mat-chip-listbox {
                 width: auto !important;
+
+                ::ng-deep .mat-mdc-chip-set {
+                    flex-wrap: nowrap !important;
+                    display: flex !important;
+                }
             }
         }
     }
-}
 
-@media (max-width: 600px) {
-    .kds-header {
-        padding: 0.5rem 1rem !important;
-
-        .brand h1 {
-            font-size: 1.2rem !important;
-        }
-
-        .station-filter {
-            max-width: 60%;
-            overflow-x: auto;
-
-            mat-chip-listbox {
-                flex-wrap: nowrap !important;
-            }
-        }
+    .kds-stats {
+        display: none !important; // Hide stats to save space on mobile
     }
 
     .item-row {
