@@ -105,7 +105,7 @@ export class CashService {
     async getShiftTransactions(shiftId: string): Promise<any[]> {
         const { data, error } = await this.supabase.client
             .from('cash_transactions')
-            .select('*, profiles(full_name, email)')
+            .select('*')
             .eq('shift_id', shiftId)
             .order('created_at', { ascending: false });
 
