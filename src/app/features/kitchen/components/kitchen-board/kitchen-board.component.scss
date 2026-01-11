@@ -312,6 +312,28 @@ $primary-blue: #448aff;
     }
 }
 
+// Global-ish styles for the select panel (needs ::ng-deep to escape component encapsulation)
+::ng_deep .dark-panel {
+    background-color: #2a2a2a !important;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px !important;
+    margin-top: 8px !important;
+
+    .mat-mdc-option {
+        color: #ffffff !important;
+
+        &.mdc-list-item--selected:not(.mdc-list-item--disabled) {
+            .mdc-list-item__primary-text {
+                color: $accent-color !important;
+            }
+        }
+
+        &:hover:not(.mdc-list-item--disabled) {
+            background-color: rgba(255, 255, 255, 0.05) !important;
+        }
+    }
+}
+
 .mobile-card {
     border-radius: 6px !important;
 

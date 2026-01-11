@@ -19,7 +19,7 @@
             <!-- Aesthetic minimalist dropdown for Mobile -->
             <div *ngIf="isHandset$ | async" class="aesthetic-filter-container">
                 <mat-select [value]="selectedStationId" (selectionChange)="onStationChange($event)"
-                    class="glass-pill-select">
+                    class="glass-pill-select" panelClass="dark-panel">
                     <mat-option value="all">Todas</mat-option>
                     <mat-option *ngFor="let station of stations$ | async" [value]="station.id">
                         {{ station.name }}
