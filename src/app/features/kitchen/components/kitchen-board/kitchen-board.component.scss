@@ -124,6 +124,7 @@ $primary-blue: #448aff;
                 font-size: 2rem;
                 font-weight: 900;
                 line-height: 1;
+                color: $text-primary; // Ensure visibility on dark background
             }
         }
 
@@ -268,15 +269,23 @@ $primary-blue: #448aff;
 
 .mobile-filters {
     flex: 1;
-    overflow-x: auto;
-    white-space: nowrap;
-    scrollbar-width: none; // Firefox
+    overflow: hidden;
+    display: flex;
+    align-items: center;
 
-    &::-webkit-scrollbar {
-        display: none;
+    .mobile-select-field {
+        width: 100%;
+        margin-bottom: -1.25em; // Offset Material padding
+
+        ::ng-deep .mdc-text-field--outline {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        ::ng-deep .mat-mdc-select-value {
+            color: $accent-color !important;
+            font-weight: 500;
+        }
     }
-
-    // Chrome/Safari
 
     ::ng_deep .mat-mdc-chip-set {
         flex-wrap: nowrap !important;
@@ -331,28 +340,22 @@ $primary-blue: #448aff;
 // Media query fallback for styles not controlled by isHandset$
 @media (max-width: 800px) {
     .kds-header {
-        padding: 5px 10px !important;
+        padding: 4px 10px !important;
         flex-direction: row !important;
         justify-content: space-between !important;
-        min-height: 50px !important;
+        min-height: 48px !important; // even smaller
 
         .brand {
             display: none !important;
         }
 
         .station-filter {
-            max-width: calc(100% - 40px) !important;
+            max-width: 100% !important;
             flex: 1 !important;
             margin: 0 !important;
-            overflow-x: auto !important;
 
-            mat-chip-listbox {
-                width: auto !important;
-
-                ::ng-deep .mat-mdc-chip-set {
-                    flex-wrap: nowrap !important;
-                    display: flex !important;
-                }
+            .mobile-select-field {
+                font-size: 0.9rem;
             }
         }
     }

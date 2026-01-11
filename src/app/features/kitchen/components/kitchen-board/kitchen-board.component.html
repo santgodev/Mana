@@ -7,16 +7,28 @@
         </div>
 
         <div class="station-filter" [class.mobile-filters]="isHandset$ | async">
-            <mat-chip-listbox aria-label="Station Selection" [value]="selectedStationId"
+            <!-- Chips for Desktop -->
+            <mat-chip-listbox *ngIf="!(isHandset$ | async)" aria-label="Station Selection" [value]="selectedStationId"
                 (change)="onStationChange($event)">
                 <mat-chip-option value="all" selected color="accent">Todos</mat-chip-option>
                 <mat-chip-option *ngFor="let station of stations$ | async" [value]="station.id" color="primary">
                     {{ station.name }}
                 </mat-chip-option>
             </mat-chip-listbox>
+
+            <!-- Dropdown for Mobile -->
+            <mat-form-field *ngIf="isHandset$ | async" appearance="outline" class="mobile-select-field">
+                <mat-select [value]="selectedStationId" (selectionChange)="onStationChange($event)"
+                    placeholder="Filtrar Estación">
+                    <mat-option value="all">Todas las Estaciones</mat-option>
+                    <mat-option *ngFor="let station of stations$ | async" [value]="station.id">
+                        {{ station.name }}
+                    </mat-option>
+                </mat-select>
+            </mat-form-field>
         </div>
 
-        <div class="actions" *ngIf="!(isHandset$ | async) || orders.length > 0">
+        <div class="actions" *ngIf="!(isHandset$ | async)">
             <button mat-icon-button color="warn" (click)="clearAll()" matTooltip="Limpiar Pantalla">
                 <mat-icon>delete_sweep</mat-icon>
             </button>
