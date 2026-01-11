@@ -2,14 +2,16 @@ import { Component, Input, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CashService } from '../../../../core/services/cash.service';
 import { AuthService } from '../../../../core/services/auth.service';
-import { CashShift, CashTransaction } from '../../../../models/supabase.types';
+import { CashShift } from '../../../../models/supabase.types';
 import { MatDialog } from '@angular/material/dialog';
 import { TransactionDialogComponent } from '../transaction-dialog/transaction-dialog.component';
 import { CashClosureDialogComponent } from '../cash-closure-dialog/cash-closure-dialog.component';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatListModule } from '@angular/material/list';
-import { map } from 'rxjs/operators';
+import { map, shareReplay } from 'rxjs/operators';
+import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
+import { Observable } from 'rxjs';
 
 @Component({
     selector: 'app-cash-dashboard',
@@ -29,18 +31,18 @@ import { map } from 'rxjs/operators';
            </div>
            <div class="shift-info">
                <span>Inicio: {{ shift.opened_at | date:'shortTime' }}</span>
-               <span class="user-pill">{{ (userEmail$ | async) }}</span>
+               <span class="user-pill" *ngIf="!(isMobile$ | async)">{{ (userEmail$ | async) }}</span>
            </div>
        </div>
 
        <!-- Metrics Cards -->
-       <div class="metrics-row">
-           <div class="metric-card base">
+       <div class="metrics-row" [class.mobile-metrics]="isMobile$ | async">
+           <div class="metric-card base" *ngIf="!(isMobile$ | async)">
                <span class="label">Base Inicial</span>
                <span class="value">{{ summary.base | currency:'CAD':'symbol-narrow':'1.0-0' }}</span>
            </div>
            
-           <div class="metric-card incomes">
+           <div class="metric-card incomes" *ngIf="!(isMobile$ | async)">
                <span class="label">Ventas + Entradas</span>
                <span class="value success">+{{ (summary.totalSalesCash + summary.totalIncomes) | currency:'CAD':'symbol-narrow':'1.0-0' }}</span>
            </div>
@@ -50,45 +52,48 @@ import { map } from 'rxjs/operators';
                <span class="value danger">-{{ summary.totalExpenses | currency:'CAD':'symbol-narrow':'1.0-0' }}</span>
            </div>
 
-           <div class="metric-card total-expected">
+           <div class="metric-card total-expected" *ngIf="!(isMobile$ | async)">
                <span class="label">Total en Caja (Estimado)</span>
                <span class="value gold">{{ summary.expectedTotal | currency:'CAD':'symbol-narrow':'1.0-0' }}</span>
            </div>
        </div>
 
        <!-- Actions -->
-       <div class="actions-toolbar">
-           <button mat-raised-button color="warn" (click)="openTransaction('expense')">
+       <div class="actions-toolbar" [class.mobile-toolbar]="isMobile$ | async">
+           <button mat-raised-button color="warn" (click)="openTransaction('expense')" [class.full-width]="isMobile$ | async">
                <mat-icon>remove_circle</mat-icon> Registrar Gasto
            </button>
            
-           <button mat-raised-button class="income-btn" (click)="openTransaction('income')">
+           <button *ngIf="!(isMobile$ | async)" mat-raised-button class="income-btn" (click)="openTransaction('income')">
                <mat-icon>add_circle</mat-icon> Ingreso Extra
            </button>
 
-           <span class="spacer"></span>
+           <span class="spacer" *ngIf="!(isMobile$ | async)"></span>
            
-           <button mat-stroked-button class="close-btn" (click)="openClosure()">
+           <button *ngIf="!(isMobile$ | async)" mat-stroked-button class="close-btn" (click)="openClosure()">
                <mat-icon>lock</mat-icon> Cerrar Caja
            </button>
        </div>
 
        <!-- Transactions History -->
        <div class="history-section">
-           <h3>Movimientos Recientes</h3>
+           <h3>{{ (isMobile$ | async) ? 'Mis Gastos' : 'Movimientos Recientes' }}</h3>
            <mat-list>
                <mat-list-item *ngFor="let t of recentTransactions">
                    <mat-icon matListItemIcon [class.red-icon]="t.type === 'expense'" [class.green-icon]="t.type === 'income'">
                        {{ t.type === 'expense' ? 'arrow_downward' : 'arrow_upward' }}
                    </mat-icon>
-                   <span matListItemTitle>{{ t.description }}</span>
+                   <div matListItemTitle class="transaction-title">
+                       {{ t.description }}
+                       <small class="user-info" *ngIf="!(isMobile$ | async)"> - Por: {{ t.profiles?.full_name || t.profiles?.email || 'Sistema' }}</small>
+                   </div>
                    <span matListItemLine>{{ t.created_at | date:'mediumTime' }}</span>
                    <span matListItemMeta [class.red-text]="t.type === 'expense'" [class.green-text]="t.type === 'income'">
                        {{ t.amount | currency:'CAD':'symbol-narrow':'1.0-0' }}
                    </span>
                </mat-list-item>
                <mat-list-item *ngIf="recentTransactions.length === 0">
-                   <span matListItemTitle style="color: #999; text-align: center">Sin movimientos manueles hoy</span>
+                   <span matListItemTitle style="color: #999; text-align: center">Sin movimientos manuales hoy</span>
                </mat-list-item>
            </mat-list>
        </div>
@@ -96,6 +101,40 @@ import { map } from 'rxjs/operators';
   `,
     styles: [`
     .dashboard-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+        padding: 24px;
+        max-width: 1600px;
+        margin: 0 auto;
+        width: 100%;
+        box-sizing: border-box;
+    }
+    /* Mobile tweaks */
+    .mobile-metrics {
+        grid-template-columns: 1fr !important;
+    }
+    .mobile-toolbar {
+        padding: 16px !important;
+        justify-content: center;
+    }
+    .full-width {
+        width: 100%;
+        height: 60px !important;
+        font-size: 1.2rem !important;
+    }
+    .transaction-title {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .user-info {
+        color: #888;
+        font-weight: 400;
+        font-style: italic;
+    }
+
+    .header-status {
         display: flex;
         flex-direction: column;
         gap: 24px;
@@ -209,15 +248,22 @@ export class CashDashboardComponent implements OnInit {
         totalExpenses: 0,
         expectedTotal: 0
     };
-    recentTransactions: CashTransaction[] = [];
+    recentTransactions: any[] = [];
     userEmail$;
+    isMobile$: Observable<boolean>;
 
     constructor(
         private cashService: CashService,
         private authService: AuthService,
-        private dialog: MatDialog
+        private dialog: MatDialog,
+        private breakpointObserver: BreakpointObserver
     ) {
         this.userEmail$ = this.authService.user$.pipe(map(u => u?.email));
+        this.isMobile$ = this.breakpointObserver.observe([Breakpoints.Handset])
+            .pipe(
+                map(result => result.matches),
+                shareReplay()
+            );
     }
 
     ngOnInit() {

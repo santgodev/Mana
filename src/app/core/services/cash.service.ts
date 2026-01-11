@@ -102,15 +102,15 @@ export class CashService {
         return data;
     }
 
-    async getShiftTransactions(shiftId: string): Promise<CashTransaction[]> {
+    async getShiftTransactions(shiftId: string): Promise<any[]> {
         const { data, error } = await this.supabase.client
             .from('cash_transactions')
-            .select('*')
+            .select('*, profiles(full_name, email)')
             .eq('shift_id', shiftId)
             .order('created_at', { ascending: false });
 
         if (error) throw error;
-        return data as CashTransaction[];
+        return data;
     }
 
     async getShiftSummary(shiftId: string): Promise<{
