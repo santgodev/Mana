@@ -8,16 +8,16 @@ import { Table } from '../../../../models/supabase.types';
 import { OrderService } from '../../../../core/services/order.service';
 
 @Component({
-    selector: 'app-table-bill-preview-dialog',
-    standalone: true,
-    imports: [
-        CommonModule,
-        MatDialogModule,
-        MatButtonModule,
-        MatIconModule,
-        MatProgressSpinnerModule
-    ],
-    template: `
+  selector: 'app-table-bill-preview-dialog',
+  standalone: true,
+  imports: [
+    CommonModule,
+    MatDialogModule,
+    MatButtonModule,
+    MatIconModule,
+    MatProgressSpinnerModule
+  ],
+  template: `
     <div class="bill-preview-container">
       <div class="dialog-header">
         <h2>Cuenta - Mesa {{ data.table.number }}</h2>
@@ -64,7 +64,7 @@ import { OrderService } from '../../../../core/services/order.service';
       </div>
     </div>
   `,
-    styles: [`
+  styles: [`
     .bill-preview-container {
       padding: 0;
       font-family: 'Outfit', sans-serif;
@@ -179,39 +179,41 @@ import { OrderService } from '../../../../core/services/order.service';
   `]
 })
 export class TableBillPreviewDialogComponent implements OnInit {
-    items: any[] = [];
-    total: number = 0;
-    loading: boolean = true;
+  items: any[] = [];
+  total: number = 0;
+  loading: boolean = true;
 
-    constructor(
-        public dialogRef: MatDialogRef<TableBillPreviewDialogComponent>,
-        @Inject(MAT_DIALOG_DATA) public data: { table: Table },
-        private orderService: OrderService
-    ) { }
+  constructor(
+    public dialogRef: MatDialogRef<TableBillPreviewDialogComponent>,
+    @Inject(MAT_DIALOG_DATA) public data: { table: Table },
+    private orderService: OrderService
+  ) { }
 
-    async ngOnInit() {
-        try {
-            this.items = await this.orderService.getActiveOrderItems(this.data.table.id);
-            this.calculateTotal();
-        } catch (error) {
-            console.error('Error loading bill preview', error);
-        } finally {
-            this.loading = false;
-        }
+  async ngOnInit() {
+    console.log('[TableBillPreview] Initializing for table:', this.data.table.number, this.data.table.id);
+    try {
+      this.items = await this.orderService.getActiveOrderItems(this.data.table.id);
+      console.log('[TableBillPreview] Loaded items:', this.items.length);
+      this.calculateTotal();
+    } catch (error) {
+      console.error('[TableBillPreview] Error loading bill preview', error);
+    } finally {
+      this.loading = false;
     }
+  }
 
-    calculateTotal() {
-        this.total = this.items.reduce((sum, item) => {
-            // Assuming item has quantity and unit_price (based on OrderService response)
-            return sum + (item.quantity * item.unit_price);
-        }, 0);
-    }
+  calculateTotal() {
+    this.total = this.items.reduce((sum, item) => {
+      // Assuming item has quantity and unit_price (based on OrderService response)
+      return sum + (item.quantity * item.unit_price);
+    }, 0);
+  }
 
-    close() {
-        this.dialogRef.close(false);
-    }
+  close() {
+    this.dialogRef.close(false);
+  }
 
-    confirmClose() {
-        this.dialogRef.close(true);
-    }
+  confirmClose() {
+    this.dialogRef.close(true);
+  }
 }

@@ -95,23 +95,27 @@ export class OrderService {
             .eq('id', tableId)
             .single();
 
+        console.log(`[OrderService] Getting active items for table: ${tableId}`);
         if (tableError || !tableData?.current_session_id) {
-            console.warn(`Table ${tableId} has no active session. Trying to find latest orders...`);
+            console.warn(`[OrderService] Table ${tableId} has no current_session_id in DB.`);
+
             // Fallback: look for latest pending orders for this table if session is missing
             const { data: fallbackOrders, error: fbError } = await this.supabase.client
                 .from('orders')
-                .select('id')
+                .select('id, status, created_at')
                 .eq('table_id', tableId)
                 .neq('status', 'cancelled')
                 .neq('status', 'paid')
                 .order('created_at', { ascending: false })
                 .limit(20);
 
+            console.log(`[OrderService] Fallback query returned ${fallbackOrders?.length || 0} orders.`);
             if (fbError || !fallbackOrders || fallbackOrders.length === 0) return [];
             const orderIds = fallbackOrders.map(o => o.id);
             return this.fetchItemsByIds(orderIds);
         }
 
+        console.log(`[OrderService] Active session found: ${tableData.current_session_id}`);
         // 2. Get Orders for this session
         const { data: orders, error: ordersError } = await this.supabase.client
             .from('orders')
@@ -120,6 +124,7 @@ export class OrderService {
             .eq('session_id', tableData.current_session_id)
             .neq('status', 'cancelled');
 
+        console.log(`[OrderService] Found ${orders?.length || 0} orders for session ${tableData.current_session_id}`);
         if (ordersError || !orders || orders.length === 0) return [];
 
         const orderIds = orders.map(o => o.id);
