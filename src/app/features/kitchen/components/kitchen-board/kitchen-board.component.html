@@ -16,16 +16,16 @@
                 </mat-chip-option>
             </mat-chip-listbox>
 
-            <!-- Dropdown for Mobile -->
-            <mat-form-field *ngIf="isHandset$ | async" appearance="outline" class="mobile-select-field">
+            <!-- Aesthetic minimalist dropdown for Mobile -->
+            <div *ngIf="isHandset$ | async" class="aesthetic-filter-container">
                 <mat-select [value]="selectedStationId" (selectionChange)="onStationChange($event)"
-                    placeholder="Filtrar Estación">
-                    <mat-option value="all">Todas las Estaciones</mat-option>
+                    class="glass-pill-select">
+                    <mat-option value="all">Todas</mat-option>
                     <mat-option *ngFor="let station of stations$ | async" [value]="station.id">
                         {{ station.name }}
                     </mat-option>
                 </mat-select>
-            </mat-form-field>
+            </div>
         </div>
 
         <div class="actions" *ngIf="!(isHandset$ | async)">

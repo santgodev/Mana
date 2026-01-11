@@ -268,32 +268,47 @@ $primary-blue: #448aff;
 }
 
 .mobile-filters {
-    flex: 1;
-    overflow: hidden;
-    display: flex;
-    align-items: center;
+    flex: none; // Don't grow
+    margin: 0 auto; // Center it
 
-    .mobile-select-field {
-        width: 100%;
-        margin-bottom: -1.25em; // Offset Material padding
-
-        ::ng-deep .mdc-text-field--outline {
-            background-color: rgba(255, 255, 255, 0.05);
-        }
-
-        ::ng-deep .mat-mdc-select-value {
-            color: $accent-color !important;
-            font-weight: 500;
-        }
+    .aesthetic-filter-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
     }
 
-    ::ng_deep .mat-mdc-chip-set {
-        flex-wrap: nowrap !important;
-        display: flex !important;
-    }
+    .glass-pill-select {
+        background: rgba(255, 255, 255, 0.08);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        border-radius: 20px;
+        padding: 6px 16px;
+        font-size: 0.85rem;
+        color: $accent-color;
+        font-weight: 500;
+        min-width: 120px;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 
-    ::ng_deep .mat-mdc-chip-box {
-        flex-shrink: 0 !important;
+        &:focus {
+            outline: none;
+            border-color: $accent-color;
+            background: rgba(255, 255, 255, 0.12);
+        }
+
+        ::ng_deep .mat-mdc-select-trigger {
+            padding-bottom: 0;
+            display: flex;
+            align-items: center;
+        }
+
+        ::ng_deep .mat-mdc-select-arrow svg {
+            fill: $accent-color !important;
+        }
+
+        ::ng_deep .mat-mdc-select-value-text {
+            text-align: center;
+        }
     }
 }
 
@@ -340,10 +355,10 @@ $primary-blue: #448aff;
 // Media query fallback for styles not controlled by isHandset$
 @media (max-width: 800px) {
     .kds-header {
-        padding: 4px 10px !important;
+        padding: 5px 12px !important;
         flex-direction: row !important;
-        justify-content: space-between !important;
-        min-height: 48px !important; // even smaller
+        justify-content: center !important; // Center the pill
+        min-height: 44px !important;
 
         .brand {
             display: none !important;
@@ -351,12 +366,7 @@ $primary-blue: #448aff;
 
         .station-filter {
             max-width: 100% !important;
-            flex: 1 !important;
-            margin: 0 !important;
-
-            .mobile-select-field {
-                font-size: 0.9rem;
-            }
+            flex: none !important;
         }
     }
 
