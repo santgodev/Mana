@@ -1,12 +1,12 @@
 <div class="kds-container">
     <!-- Top Bar -->
-    <div class="kds-header">
-        <div class="brand">
+    <div class="kds-header" [class.mobile-header]="isHandset$ | async">
+        <div class="brand" *ngIf="!(isHandset$ | async)">
             <mat-icon>restaurant_menu</mat-icon>
             <h1>Tablero de Cocina</h1>
         </div>
 
-        <div class="station-filter">
+        <div class="station-filter" [class.mobile-filters]="isHandset$ | async">
             <mat-chip-listbox aria-label="Station Selection" [value]="selectedStationId"
                 (change)="onStationChange($event)">
                 <mat-chip-option value="all" selected color="accent">Todos</mat-chip-option>
@@ -16,7 +16,7 @@
             </mat-chip-listbox>
         </div>
 
-        <div class="actions">
+        <div class="actions" *ngIf="!(isHandset$ | async) || orders.length > 0">
             <button mat-icon-button color="warn" (click)="clearAll()" matTooltip="Limpiar Pantalla">
                 <mat-icon>delete_sweep</mat-icon>
             </button>
@@ -29,16 +29,17 @@
     </div>
 
     <!-- Orders Grid -->
-    <div class="kds-grid">
-        <div *ngFor="let order of orders; trackBy: trackByOrderId" class="kds-card" [ngClass]="getPriority(order)">
+    <div class="kds-grid" [class.mobile-grid]="isHandset$ | async">
+        <div *ngFor="let order of orders; trackBy: trackByOrderId" class="kds-card" [ngClass]="getPriority(order)"
+            [class.mobile-card]="isHandset$ | async">
 
             <div class="card-header">
-                <div class="table-info">
-                    <span class="label">Mesa</span>
-                    <span class="number">{{ order.table?.number || '?' }}</span>
+                <div class="table-info" [class.mobile-table-info]="isHandset$ | async">
+                    <span class="label" *ngIf="!(isHandset$ | async)">Mesa</span>
+                    <span class="number">Mesa {{ order.table?.number || '?' }}</span>
                 </div>
-                <div class="timer-badge">
-                    <mat-icon>timer</mat-icon>
+                <div class="timer-badge" [class.mobile-timer]="isHandset$ | async">
+                    <mat-icon *ngIf="!(isHandset$ | async)">timer</mat-icon>
                     {{ getElapsedTime(order.created_at) }}
                 </div>
             </div>
@@ -74,8 +75,10 @@
 
             <div class="card-footer">
                 <!-- Convenience Button: Mark All MINE Ready -->
-                <button mat-flat-button color="primary" class="btn-block" (click)="markStationItemsReady(order)">
-                    <mat-icon>done_all</mat-icon> ESTACIÓN LISTA
+                <button mat-flat-button color="primary" class="btn-block" [class.mobile-btn]="isHandset$ | async"
+                    (click)="markStationItemsReady(order)">
+                    <mat-icon>done_all</mat-icon>
+                    <span>{{ (isHandset$ | async) ? 'Listo' : 'ESTACIÓN LISTA' }}</span>
                 </button>
             </div>
 

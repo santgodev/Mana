@@ -19,16 +19,22 @@ $primary-blue: #448aff;
 
 // Header
 .kds-header {
-    background: rgba(30, 30, 30, 0.8);
+    background: rgba(30, 30, 30, 0.95);
     backdrop-filter: blur(10px);
-    padding: 1rem 2rem;
+    padding: 0.8rem 1.5rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
     position: sticky;
     top: 0;
     z-index: 100;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+
+    &.mobile-header {
+        padding: 8px 12px !important;
+        gap: 8px;
+        min-height: 56px;
+    }
 
     .brand {
         display: flex;
@@ -38,15 +44,15 @@ $primary-blue: #448aff;
 
         h1 {
             margin: 0;
-            font-size: 1.5rem;
-            letter-spacing: 2px;
+            font-size: 1.2rem;
+            letter-spacing: 1px;
             text-transform: uppercase;
         }
 
         mat-icon {
-            font-size: 2rem;
-            width: 2rem;
-            height: 2rem;
+            font-size: 1.8rem;
+            width: 1.8rem;
+            height: 1.8rem;
         }
     }
 }
@@ -250,6 +256,127 @@ $primary-blue: #448aff;
 
     100% {
         box-shadow: 0 0 0 0 rgba($danger-color, 0);
+    }
+}
+
+// Mobile Optimizations
+.mobile-grid {
+    grid-template-columns: 1fr !important;
+    padding: 8px !important;
+    gap: 10px !important;
+}
+
+.mobile-filters {
+    flex: 1;
+    overflow-x: auto;
+    white-space: nowrap;
+    scrollbar-width: none; // Firefox
+
+    &::-webkit-scrollbar {
+        display: none;
+    }
+
+    // Chrome/Safari
+
+    ::ng_deep .mat-mdc-chip-set {
+        flex-wrap: nowrap !important;
+        display: flex !important;
+    }
+
+    ::ng_deep .mat-mdc-chip-box {
+        flex-shrink: 0 !important;
+    }
+}
+
+.mobile-card {
+    border-radius: 6px !important;
+
+    .card-header {
+        padding: 6px 10px !important;
+        background: rgba(255, 255, 255, 0.05) !important;
+    }
+
+    .card-body {
+        padding: 8px !important;
+    }
+
+    .card-footer {
+        padding: 6px !important;
+    }
+}
+
+.mobile-table-info {
+    .number {
+        font-size: 1.2rem !important;
+        font-weight: 700 !important;
+    }
+}
+
+.mobile-timer {
+    font-size: 0.9rem !important;
+    padding: 3px 8px !important;
+}
+
+.mobile-btn {
+    height: 40px !important;
+    font-size: 0.9rem !important;
+
+    mat-icon {
+        font-size: 1.2rem !important;
+        width: 1.2rem !important;
+        height: 1.2rem !important;
+    }
+}
+
+// Media query fallback for styles not controlled by isHandset$
+@media (max-width: 800px) {
+    .kds-header {
+        padding: 5px 10px !important;
+        flex-direction: row !important;
+        justify-content: space-between !important;
+        min-height: 50px !important;
+
+        .brand {
+            display: none !important; // Absolute hide on tablet/mobile
+        }
+
+        .station-filter {
+            max-width: calc(100% - 40px) !important;
+            flex: 1 !important;
+            margin: 0 !important;
+            overflow-x: auto !important;
+
+            mat-chip-listbox {
+                width: auto !important;
+            }
+        }
+    }
+}
+
+@media (max-width: 600px) {
+    .kds-header {
+        padding: 0.5rem 1rem !important;
+
+        .brand h1 {
+            font-size: 1.2rem !important;
+        }
+
+        .station-filter {
+            max-width: 60%;
+            overflow-x: auto;
+
+            mat-chip-listbox {
+                flex-wrap: nowrap !important;
+            }
+        }
+    }
+
+    .item-row {
+        padding: 6px !important;
+
+        .name {
+            font-size: 1rem !important;
+        }
     }
 }
 

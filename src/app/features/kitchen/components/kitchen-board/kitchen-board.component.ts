@@ -16,6 +16,10 @@ import { FormsModule } from '@angular/forms';
 import { StationService } from '../../../../core/services/station.service';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
+import { Observable } from 'rxjs';
+import { map, shareReplay } from 'rxjs/operators';
+
 
 @Component({
     selector: 'app-kitchen-board',
@@ -47,13 +51,21 @@ export class KitchenBoardComponent implements OnInit, OnDestroy {
     private sub: Subscription = new Subscription();
     private refreshInterval = interval(30000); // Check priorities every 30s
 
+    isHandset$: Observable<boolean>;
+
     constructor(
         private kitchenService: KitchenService,
         private stationService: StationService,
         private dialog: MatDialog,
-        private snackBar: MatSnackBar
+        private snackBar: MatSnackBar,
+        private breakpointObserver: BreakpointObserver
     ) {
         this.stations$ = this.stationService.stations$;
+        this.isHandset$ = this.breakpointObserver.observe([Breakpoints.Handset])
+            .pipe(
+                map(result => result.matches),
+                shareReplay()
+            );
     }
 
     ngOnInit(): void {
