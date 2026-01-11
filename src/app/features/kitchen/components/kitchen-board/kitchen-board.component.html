@@ -8,9 +8,9 @@
 
         <div class="station-filter" [class.mobile-filters]="isHandset$ | async">
             <!-- Chips for Desktop -->
-            <mat-chip-listbox *ngIf="!(isHandset$ | async)" aria-label="Station Selection" [value]="selectedStationId"
+            <mat-chip-listbox *ngIf="!(isHandset$ | async)" aria-label="Station Selection" [(value)]="selectedStationId"
                 (change)="onStationChange($event)">
-                <mat-chip-option value="all" selected color="accent">Todos</mat-chip-option>
+                <mat-chip-option value="all" color="accent">Todos</mat-chip-option>
                 <mat-chip-option *ngFor="let station of stations$ | async" [value]="station.id" color="primary">
                     {{ station.name }}
                 </mat-chip-option>
@@ -18,7 +18,7 @@
 
             <!-- Aesthetic minimalist dropdown for Mobile -->
             <div *ngIf="isHandset$ | async" class="aesthetic-filter-container">
-                <mat-select [value]="selectedStationId" (selectionChange)="onStationChange($event)"
+                <mat-select [(value)]="selectedStationId" (selectionChange)="onStationChange($event)"
                     class="glass-pill-select" panelClass="dark-panel">
                     <mat-option value="all">Todas</mat-option>
                     <mat-option *ngFor="let station of stations$ | async" [value]="station.id">

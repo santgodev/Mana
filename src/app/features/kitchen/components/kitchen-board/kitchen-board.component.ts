@@ -108,11 +108,10 @@ export class KitchenBoardComponent implements OnInit, OnDestroy {
     }
 
     onStationChange(event: any) {
-        // MatChipListbox emits a change event, but we bound value.
-        // If coming from chip SelectionChange
-        if (event.value) {
-            this.selectedStationId = event.value;
-        }
+        // Update handling for both Chips and Select
+        const newValue = event.value !== undefined ? event.value : (event.option ? event.option.value : this.selectedStationId);
+        this.selectedStationId = newValue;
+
         console.log('🔄 CAMBIO DE ESTACIÓN:', this.selectedStationId);
         this.filterOrders();
     }
