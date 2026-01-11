@@ -1,0 +1,195 @@
+.toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background: var(--bg-card) !important;
+  box-shadow: var(--shadow-soft) !important;
+  border-bottom: 1px solid var(--border-light) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.menu-button {
+  margin-right: 16px;
+  color: var(--coffee-medium) !important;
+  transition: all 0.3s ease;
+}
+
+.menu-button:hover {
+  background: var(--coffee-cream) !important;
+  transform: scale(1.05);
+}
+
+.app-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  font-family: 'Poppins', sans-serif;
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-left: 8px;
+}
+
+.spacer {
+  flex: 1 1 auto;
+}
+
+.user-section {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.notification-button {
+  margin-right: 8px;
+  color: var(--coffee-medium) !important;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.notification-button:hover {
+  background: var(--coffee-cream) !important;
+  transform: scale(1.05);
+}
+
+.user-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-primary) !important;
+  background: var(--coffee-cream) !important;
+  border-radius: 12px !important;
+  padding: 8px 16px !important;
+  transition: all 0.3s ease;
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+}
+
+.user-button:hover {
+  background: var(--coffee-light) !important;
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-soft);
+}
+
+.user-name {
+  margin: 0 4px;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.notifications-menu {
+  min-width: 320px;
+  max-width: 400px;
+  border-radius: 16px !important;
+  box-shadow: var(--shadow-medium) !important;
+  border: 1px solid var(--border-light) !important;
+  overflow: hidden;
+}
+
+.notification-header {
+  padding: 20px;
+  background: var(--gradient-primary);
+  color: white;
+}
+
+.notification-header h3 {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 600;
+  font-family: 'Inter', sans-serif;
+}
+
+.notification-content {
+  max-height: 300px;
+  overflow-y: auto;
+  background: var(--bg-card);
+}
+
+.notification-item {
+  display: flex;
+  align-items: flex-start;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border-light);
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.notification-item:hover {
+  background: var(--coffee-cream);
+  transform: translateX(4px);
+}
+
+.notification-icon {
+  margin-right: 16px;
+  margin-top: 2px;
+  color: var(--coffee-medium);
+  font-size: 1.25rem;
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.notification-text {
+  flex: 1;
+}
+
+.notification-title {
+  margin: 0 0 6px 0;
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--text-primary);
+  font-family: 'Inter', sans-serif;
+}
+
+.notification-message {
+  margin: 0 0 6px 0;
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  line-height: 1.4;
+  font-family: 'Inter', sans-serif;
+}
+
+.notification-time {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.no-notifications {
+  padding: 40px 20px;
+  text-align: center;
+  color: var(--text-muted);
+  font-family: 'Inter', sans-serif;
+}
+
+.user-menu {
+  min-width: 220px;
+  border-radius: 12px !important;
+  box-shadow: var(--shadow-medium) !important;
+  border: 1px solid var(--border-light) !important;
+  overflow: hidden;
+}
+
+.user-menu .mat-mdc-menu-item {
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.user-menu .mat-mdc-menu-item:hover {
+  background: var(--coffee-cream);
+}
+
+@media (max-width: 768px) {
+  .user-name {
+    display: none;
+  }
+  
+  .app-title {
+    font-size: 1.2rem;
+  }
+  
+  .user-section {
+    gap: 8px;
+  }
+}

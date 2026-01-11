@@ -1,0 +1,62 @@
+.sidenav-container {
+  height: 100vh;
+  background: var(--bg-primary);
+}
+
+.sidenav {
+  width: 280px;
+  background: var(--gradient-primary);
+  color: white;
+  box-shadow: var(--shadow-medium);
+  border-right: 1px solid var(--border-light);
+}
+
+.layout-content {
+  display: flex !important;
+  flex-direction: column !important;
+  height: 100vh !important;
+  overflow: hidden !important;
+}
+
+.main-content {
+  padding: 0; // Padding handled by individual pages for full-width capability
+  background: var(--bg-primary);
+  // Use flex-grow to take remaining space
+  flex: 1;
+  overflow: auto;
+  /* Scrollable content area */
+  position: relative;
+  /* Fix horizontal overflow */
+  display: flex;
+  /* Allow children to flex */
+  flex-direction: column;
+}
+
+.main-content::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="coffee-steam" x="0" y="0" width="50" height="50" patternUnits="userSpaceOnUse"><path d="M25,10 Q30,5 35,10 Q40,15 35,20 Q30,25 25,20 Q20,15 25,10" fill="rgba(139,69,19,0.02)" stroke="none"/></pattern></defs><rect width="100" height="100" fill="url(%23coffee-steam)"/></svg>');
+  opacity: 0.5;
+  pointer-events: none;
+  z-index: -1;
+}
+
+@media (max-width: 768px) {
+  .sidenav {
+    width: 260px;
+  }
+
+  .main-content {
+    padding: 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .main-content {
+    padding: 0;
+  }
+}

@@ -1,0 +1,88 @@
+<div class="dialog-container">
+  <h2 mat-dialog-title>
+    <mat-icon>{{ isEdit ? 'edit' : 'add' }}</mat-icon>
+    {{ isEdit ? 'Editar Mesa' : 'Nueva Mesa' }}
+  </h2>
+
+  <mat-dialog-content>
+    <form [formGroup]="tableForm" class="table-form">
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Número de Mesa *</mat-label>
+          <input matInput type="number" formControlName="number" placeholder="1" min="1">
+          <mat-error *ngIf="tableForm.get('number')?.hasError('required')">
+            El número es requerido
+          </mat-error>
+          <mat-error *ngIf="tableForm.get('number')?.hasError('min')">
+            El número debe ser mayor a 0
+          </mat-error>
+        </mat-form-field>
+      </div>
+
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Capacidad *</mat-label>
+          <input matInput type="number" formControlName="capacity" placeholder="4" min="1" max="20">
+          <mat-error *ngIf="tableForm.get('capacity')?.hasError('required')">
+            La capacidad es requerida
+          </mat-error>
+          <mat-error *ngIf="tableForm.get('capacity')?.hasError('min')">
+            La capacidad debe ser mayor a 0
+          </mat-error>
+          <mat-error *ngIf="tableForm.get('capacity')?.hasError('max')">
+            La capacidad no puede ser mayor a 20
+          </mat-error>
+        </mat-form-field>
+      </div>
+
+      <!-- Position fields removed as they are handled via drag & drop -->
+
+      <!-- Estado de la mesa (solo para edición) -->
+      <div class="form-row" *ngIf="isEdit">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Estado</mat-label>
+          <mat-select formControlName="status">
+            <mat-option value="available">Disponible</mat-option>
+            <mat-option value="occupied">Ocupada</mat-option>
+            <mat-option value="reserved">Reservada</mat-option>
+            <mat-option value="maintenance">Mantenimiento</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <!-- Vista previa de la mesa -->
+      <div class="table-preview" *ngIf="tableForm.valid">
+        <h4>Vista Previa</h4>
+        <div class="preview-card" [class]="'preview-' + (tableForm.get('status')?.value || 'available')">
+          <div class="preview-header">
+            <div class="preview-number">{{ tableForm.get('number')?.value || '1' }}</div>
+            <div class="preview-status">
+              <mat-icon>{{ getStatusIcon(tableForm.get('status')?.value || 'available') }}</mat-icon>
+              <span>{{ getStatusText(tableForm.get('status')?.value || 'available') }}</span>
+            </div>
+          </div>
+          <div class="preview-content">
+            <h5>Mesa {{ tableForm.get('number')?.value || '1' }}</h5>
+            <div class="preview-info">
+              <div class="info-item">
+                <mat-icon>people</mat-icon>
+                <span>{{ tableForm.get('capacity')?.value || '4' }} personas</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </form>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button (click)="onCancel()" type="button">
+      Cancelar
+    </button>
+    <button mat-raised-button color="primary" (click)="onSave()" [disabled]="tableForm.invalid || isLoading"
+      type="button">
+      <mat-icon *ngIf="isLoading">hourglass_empty</mat-icon>
+      {{ isLoading ? 'Guardando...' : (isEdit ? 'Actualizar' : 'Crear') }}
+    </button>
+  </mat-dialog-actions>
+</div>

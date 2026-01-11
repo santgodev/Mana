@@ -1,0 +1,44 @@
+<div class="menu-container">
+    <div class="menu-header">
+        <div class="header-info">
+            <h2>Mesa {{ data.table.number }}</h2>
+            <span class="status-badge occupied">Ocupada</span>
+            <span class="timer-badge">
+                <mat-icon>timer</mat-icon> {{ getElapsedTime() }}
+            </span>
+        </div>
+        <button mat-icon-button class="close-btn" (click)="close()">
+            <mat-icon>close</mat-icon>
+        </button>
+    </div>
+
+    <div class="action-grid">
+        <button class="action-tile order" (click)="selectAction('order')">
+            <div class="icon-wrapper">
+                <mat-icon>restaurant_menu</mat-icon>
+            </div>
+            <span class="label">Tomar Pedido</span>
+        </button>
+
+        <button class="action-tile bill" (click)="selectAction('bill')">
+            <div class="icon-wrapper">
+                <mat-icon>receipt_long</mat-icon>
+            </div>
+            <span class="label">Ver Cuenta</span>
+        </button>
+
+        <button class="action-tile close-table" (click)="selectAction('close')">
+            <div class="icon-wrapper">
+                <mat-icon>payments</mat-icon>
+            </div>
+            <span class="label">Cerrar Mesa</span>
+        </button>
+
+        <button class="action-tile qr" (click)="selectAction('qr')">
+            <div class="icon-wrapper">
+                <mat-icon>qr_code_2</mat-icon>
+            </div>
+            <span class="label">Ver QR</span>
+        </button>
+    </div>
+</div>

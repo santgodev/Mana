@@ -1,0 +1,228 @@
+<div class="zone-panel-container">
+  <!-- Header con estadísticas -->
+  <div class="panel-header">
+    <div class="header-content">
+      <div class="title-section">
+        <h1 class="panel-title">
+          <mat-icon>location_on</mat-icon>
+          Gestión de Zonas
+        </h1>
+        <p class="panel-subtitle">Organiza las zonas de tu café y gestiona las mesas</p>
+      </div>
+
+      <div class="stats-section">
+        <div class="stat-card" *ngFor="let stat of (stats$ | async)">
+          <div class="stat-icon" [class]="getStatIconClass(stat.key)">
+            <mat-icon>{{ getStatIcon(stat.key) }}</mat-icon>
+          </div>
+          <div class="stat-content">
+            <h3 class="stat-value">{{ stat.value }}</h3>
+            <p class="stat-label">{{ stat.label }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="actions-section">
+      <button mat-raised-button color="primary" (click)="openZoneDialog()" class="action-button">
+        <mat-icon>add_location</mat-icon>
+        Nueva Zona
+      </button>
+
+      <button mat-stroked-button (click)="toggleView()" class="view-toggle">
+        <mat-icon>{{ isGridView ? 'view_list' : 'grid_view' }}</mat-icon>
+        {{ isGridView ? 'Vista Lista' : 'Vista Grilla' }}
+      </button>
+    </div>
+  </div>
+
+  <!-- Filtros -->
+  <div class="filters-section">
+    <mat-card class="filters-card">
+      <mat-card-content>
+        <div class="filters-row">
+          <mat-form-field appearance="outline" class="filter-field">
+            <mat-label>Filtrar por tipo</mat-label>
+            <mat-select [(ngModel)]="selectedType" (selectionChange)="filterZones()">
+              <mat-option value="">Todos los tipos</mat-option>
+              <mat-option value="indoor">Interior</mat-option>
+              <mat-option value="outdoor">Exterior</mat-option>
+              <mat-option value="terrace">Terraza</mat-option>
+              <mat-option value="private">Privada</mat-option>
+              <mat-option value="floor">Piso</mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="filter-field">
+            <mat-label>Filtrar por piso</mat-label>
+            <mat-select [(ngModel)]="selectedFloor" (selectionChange)="filterZones()">
+              <mat-option value="">Todos los pisos</mat-option>
+              <mat-option value="0">Planta Baja</mat-option>
+              <mat-option value="1">Piso 1</mat-option>
+              <mat-option value="2">Piso 2</mat-option>
+              <mat-option value="3">Piso 3</mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <button mat-stroked-button (click)="clearFilters()" class="clear-filters">
+            <mat-icon>clear</mat-icon>
+            Limpiar Filtros
+          </button>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <!-- Vista de Zonas -->
+  <div class="zones-section">
+    <!-- Vista de Grilla -->
+    <div class="zones-grid" *ngIf="isGridView">
+      <div class="zone-card" *ngFor="let zone of filteredZones" [class]="'zone-' + zone.type"
+        (click)="openZoneBoard(zone)">
+        <div class="zone-header">
+          <div class="zone-type">
+            <mat-icon>{{ getZoneTypeIcon(zone.type) }}</mat-icon>
+            <span>{{ getZoneTypeText(zone.type) }}</span>
+          </div>
+          <div class="zone-status" [class]="zone.active ? 'active' : 'inactive'">
+            <mat-icon>{{ zone.active ? 'check_circle' : 'cancel' }}</mat-icon>
+            <span>{{ zone.active ? 'Activa' : 'Inactiva' }}</span>
+          </div>
+        </div>
+
+        <div class="zone-content">
+          <h3 class="zone-name">{{ zone.name }}</h3>
+          <p class="zone-description">{{ zone.description }}</p>
+
+          <div class="zone-info">
+            <div class="info-item">
+              <mat-icon>people</mat-icon>
+              <span>{{ zone.capacity }} personas</span>
+            </div>
+            <div class="info-item" *ngIf="zone.floor !== undefined">
+              <mat-icon>stairs</mat-icon>
+              <span>Piso {{ zone.floor }}</span>
+            </div>
+            <div class="info-item">
+              <mat-icon>table_restaurant</mat-icon>
+              <span>{{ (zone.tables || []).length }} mesas</span>
+            </div>
+          </div>
+
+          <!-- Estado de las mesas -->
+          <div class="tables-status">
+            <div class="status-item available" *ngIf="getTableCountByStatus(zone, 'available') > 0">
+              <div class="status-dot"></div>
+              <span>{{ getTableCountByStatus(zone, 'available') }} disponibles</span>
+            </div>
+            <div class="status-item occupied" *ngIf="getTableCountByStatus(zone, 'occupied') > 0">
+              <div class="status-dot"></div>
+              <span>{{ getTableCountByStatus(zone, 'occupied') }} ocupadas</span>
+            </div>
+            <div class="status-item reserved" *ngIf="getTableCountByStatus(zone, 'reserved') > 0">
+              <div class="status-dot"></div>
+              <span>{{ getTableCountByStatus(zone, 'reserved') }} reservadas</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="zone-actions">
+          <button mat-icon-button (click)="editZone(zone)" matTooltip="Editar Zona" class="action-btn edit">
+            <mat-icon>edit</mat-icon>
+          </button>
+
+          <button mat-icon-button (click)="toggleZoneStatus(zone)"
+            [matTooltip]="zone.active ? 'Desactivar Zona' : 'Activar Zona'" class="action-btn toggle">
+            <mat-icon>{{ zone.active ? 'visibility_off' : 'visibility' }}</mat-icon>
+          </button>
+
+          <button mat-icon-button (click)="deleteZone(zone)" matTooltip="Eliminar Zona" class="action-btn delete">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Vista de Lista -->
+    <div class="zones-list" *ngIf="!isGridView">
+      <mat-card class="list-card">
+        <mat-card-content>
+          <div class="list-header">
+            <div class="list-column">Zona</div>
+            <div class="list-column">Tipo</div>
+            <div class="list-column">Piso</div>
+            <div class="list-column">Capacidad</div>
+            <div class="list-column">Mesas</div>
+            <div class="list-column">Estado</div>
+            <div class="list-column">Acciones</div>
+          </div>
+
+          <div class="list-row" *ngFor="let zone of filteredZones">
+            <div class="list-cell">
+              <div class="zone-name">{{ zone.name }}</div>
+              <div class="zone-description">{{ zone.description }}</div>
+            </div>
+
+            <div class="list-cell">
+              <div class="zone-type">
+                <mat-icon>{{ getZoneTypeIcon(zone.type) }}</mat-icon>
+                <span>{{ getZoneTypeText(zone.type) }}</span>
+              </div>
+            </div>
+
+            <div class="list-cell">
+              <span class="floor-info" *ngIf="zone.floor !== undefined">Piso {{ zone.floor }}</span>
+              <span class="no-floor" *ngIf="zone.floor === undefined">-</span>
+            </div>
+
+            <div class="list-cell">
+              <div class="capacity-info">
+                <mat-icon>people</mat-icon>
+                <span>{{ zone.capacity }}</span>
+              </div>
+            </div>
+
+            <div class="list-cell">
+              <div class="tables-info">
+                <mat-icon>table_restaurant</mat-icon>
+                <span>{{ (zone.tables || []).length }}</span>
+              </div>
+            </div>
+
+            <div class="list-cell">
+              <div class="zone-status" [class]="zone.active ? 'active' : 'inactive'">
+                <mat-icon>{{ zone.active ? 'check_circle' : 'cancel' }}</mat-icon>
+                <span>{{ zone.active ? 'Activa' : 'Inactiva' }}</span>
+              </div>
+            </div>
+
+            <div class="list-cell">
+              <div class="action-buttons">
+                <button mat-icon-button (click)="openZoneBoard(zone)" matTooltip="Abrir Tablero"
+                  class="action-btn board">
+                  <mat-icon>dashboard</mat-icon>
+                </button>
+
+                <button mat-icon-button (click)="editZone(zone)" matTooltip="Editar Zona" class="action-btn edit">
+                  <mat-icon>edit</mat-icon>
+                </button>
+
+                <button mat-icon-button (click)="toggleZoneStatus(zone)"
+                  [matTooltip]="zone.active ? 'Desactivar' : 'Activar'" class="action-btn toggle">
+                  <mat-icon>{{ zone.active ? 'visibility_off' : 'visibility' }}</mat-icon>
+                </button>
+              </div>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+
+  <!-- Mensaje cuando no hay zonas -->
+  <div class="no-zones" *ngIf="filteredZones.length === 0">
+    <mat-icon>location_off</mat-icon>
+    <h3>No hay zonas disponibles</h3>
+    <p>Ajusta los filtros o crea una nueva zona</p>
+  </div>
+</div>

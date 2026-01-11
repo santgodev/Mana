@@ -1,0 +1,195 @@
+@use 'sass:color';
+
+// Variables (matching global theme)
+$primary: #8B4513; // Coffee
+$accent: #D4AF37; // Gold
+$danger: #A52A2A; // Sienna Red
+$info: #008080; // Teal/Blueish for bill
+$neutral: #6c757d;
+$bg-light: #FFF8F0;
+
+.menu-container {
+    padding: 24px;
+    background: white; // Or $bg-light for warmer feel
+    border-radius: 16px; // Handled by dialog but good to ensure content fits
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    min-width: 320px;
+}
+
+.menu-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+
+    .header-info {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+
+        h2 {
+            margin: 0;
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--coffee-dark, #2C1810);
+            font-family: 'Outfit', sans-serif;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+
+            &.occupied {
+                background: rgba($danger, 0.1);
+                color: $danger;
+            }
+        }
+
+        .timer-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            color: var(--text-secondary, #6B4E3D);
+            font-size: 0.9rem;
+            font-weight: 500;
+            font-family: 'JetBrains Mono', monospace;
+
+            mat-icon {
+                font-size: 16px;
+                width: 16px;
+                height: 16px;
+            }
+        }
+    }
+
+    .close-btn {
+        margin: -12px -12px 0 0; // Pull to corner
+        color: var(--text-secondary);
+    }
+}
+
+.action-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.action-tile {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    height: 140px;
+    border: none;
+    border-radius: 16px;
+    background: #f8f9fa;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    padding: 16px;
+
+    // Defaults
+    color: var(--coffee-dark);
+
+    .icon-wrapper {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        background: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        transition: transform 0.2s;
+
+        mat-icon {
+            font-size: 24px;
+            width: 24px;
+            height: 24px;
+        }
+    }
+
+    .label {
+        font-size: 1rem;
+        font-weight: 600;
+        line-height: 1.2;
+        text-align: center;
+    }
+
+    &:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+
+        .icon-wrapper {
+            transform: scale(1.1);
+        }
+    }
+
+    &:active {
+        transform: translateY(-1px);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    // VARIANTS
+    &.order {
+        background: $primary;
+        color: white;
+
+        .icon-wrapper {
+            color: $primary;
+        }
+    }
+
+    &.bill {
+        background: white;
+        box-shadow: inset 0 0 0 2px $info; // Border look
+        color: $info;
+
+        .icon-wrapper {
+            background: $info;
+            color: white;
+        }
+
+        &:hover {
+            background: rgba($info, 0.05);
+        }
+    }
+
+    &.close-table {
+        background: rgba($danger, 0.1);
+        color: $danger;
+
+        .icon-wrapper {
+            background: white;
+            color: $danger;
+        }
+
+        &:hover {
+            background: $danger;
+            color: white;
+
+            .icon-wrapper {
+                color: $danger;
+            }
+        }
+    }
+
+    &.qr {
+        background: white;
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        color: $neutral;
+
+        .icon-wrapper {
+            background: $neutral;
+            color: white;
+        }
+    }
+}

@@ -1,0 +1,147 @@
+<div class="table-details-panel" *ngIf="table">
+  <!-- Header del Panel -->
+  <div class="panel-header">
+    <div class="header-content">
+      <div class="table-info">
+        <div class="table-icon" [class]="'status-' + table.status">
+          <mat-icon>{{ getStatusIcon(table.status) }}</mat-icon>
+        </div>
+        <div class="table-title">
+          <h2>Mesa {{ table.number }}</h2>
+          <p>Capacidad: {{ table.capacity }} personas</p>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <button mat-icon-button (click)="closePanel()" class="close-btn">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Contenido del Panel -->
+  <div class="panel-content">
+    <!-- Estado de la Mesa -->
+    <div class="status-section">
+      <mat-card class="status-card">
+        <mat-card-header>
+          <mat-card-title>Estado Actual</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="status-info">
+            <div class="status-indicator" [class]="'status-' + table.status">
+              <mat-icon>{{ getStatusIcon(table.status) }}</mat-icon>
+              <span>{{ getStatusText(table.status) }}</span>
+            </div>
+
+            <div class="status-actions" *ngIf="table.status === 'free'">
+              <button mat-raised-button color="primary" (click)="openTable()" class="action-button">
+                <mat-icon>restaurant</mat-icon>
+                Abrir Mesa
+              </button>
+            </div>
+
+            <div class="status-actions" *ngIf="table.status === 'occupied'">
+              <button mat-raised-button color="accent" (click)="closeTable()" class="action-button">
+                <mat-icon>close</mat-icon>
+                Cerrar Mesa
+              </button>
+              <button mat-stroked-button (click)="viewOrder()" class="action-button">
+                <mat-icon>receipt</mat-icon>
+                Ver Pedido
+              </button>
+            </div>
+
+            <div class="status-actions" *ngIf="table.status === 'waiting'">
+              <button mat-raised-button color="primary" (click)="confirmReservation()" class="action-button">
+                <mat-icon>check</mat-icon>
+                Confirmar Reserva
+              </button>
+              <button mat-stroked-button (click)="viewReservation()" class="action-button">
+                <mat-icon>event</mat-icon>
+                Ver Reserva
+              </button>
+            </div>
+
+            <div class="status-actions" *ngIf="table.status === 'paying'">
+              <!-- Paying Logic -->
+              <button mat-raised-button color="warn" (click)="closeTable()" class="action-button">
+                <mat-icon>payments</mat-icon>
+                Confirmar Pago
+              </button>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <!-- Información de la Mesa -->
+    <div class="info-section">
+      <mat-card class="info-card">
+        <mat-card-header>
+          <mat-card-title>Información de la Mesa</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="info-grid">
+            <div class="info-item">
+              <mat-icon>table_restaurant</mat-icon>
+              <div class="info-content">
+                <label>Número</label>
+                <span>{{ table.number }}</span>
+              </div>
+            </div>
+
+            <div class="info-item">
+              <mat-icon>people</mat-icon>
+              <div class="info-content">
+                <label>Capacidad</label>
+                <span>{{ table.capacity }} personas</span>
+              </div>
+            </div>
+
+            <div class="info-item">
+              <mat-icon>category</mat-icon>
+              <div class="info-content">
+                <label>Forma</label>
+                <span>{{ getShapeText(table.shape) }}</span>
+              </div>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <!-- Acciones Rápidas -->
+    <div class="quick-actions">
+      <mat-card class="actions-card">
+        <mat-card-header>
+          <mat-card-title>Acciones Rápidas</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="action-buttons">
+            <button mat-stroked-button (click)="editTable()" class="action-btn">
+              <mat-icon>edit</mat-icon>
+              Editar Mesa
+            </button>
+
+            <button mat-stroked-button (click)="reserveTable()" class="action-btn">
+              <mat-icon>event</mat-icon>
+              Reservar
+            </button>
+
+            <button mat-stroked-button (click)="setMaintenance()" class="action-btn">
+              <mat-icon>build</mat-icon>
+              Mantenimiento
+            </button>
+
+            <button mat-stroked-button (click)="deleteTable()" class="action-btn delete">
+              <mat-icon>delete</mat-icon>
+              Eliminar
+            </button>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+</div>

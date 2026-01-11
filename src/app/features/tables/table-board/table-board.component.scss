@@ -1,0 +1,664 @@
+@use 'sass:color';
+
+// --- COFFEE SHOP POS THEME ---
+// Using global variables mapped in styles.scss
+$bg-app: var(--bg-primary, #FFF8F0);
+$bg-sidebar: var(--coffee-dark, #3C2415);
+$bg-card: var(--bg-card, #FFFFFF);
+
+$border-subtle: rgba(0, 0, 0, 0.08); // Subtle border for light theme
+$border-active: var(--coffee-medium, #8B4513);
+
+$text-primary: var(--text-primary, #2C1810);
+$text-secondary: var(--text-secondary, #6B4E3D);
+$text-sidebar: #F5E6D3; // Light cream text for dark sidebar
+$text-muted: color-mix(in srgb, var(--text-secondary), transparent 30%);
+
+$primary: var(--coffee-medium, #8B4513);
+$accent: var(--accent-gold, #D4AF37);
+$success: #6A8E4E; // Matcha / Sage Green
+$warning: #D4AF37; // Metallic Gold
+$danger: #A52A2A; // Brownish Red (Sienna)
+
+// SLA Colors
+$sla-good: $success;
+$sla-warning: $warning;
+$sla-danger: $danger;
+
+:host {
+  display: block;
+  height: 100vh;
+  overflow: hidden;
+  font-family: 'Inter', system-ui, sans-serif;
+  box-sizing: border-box;
+}
+
+// --- LAYOUT ---
+.saas-container {
+  display: flex;
+  flex-direction: column; // Vertical stack now
+  height: 100vh;
+  background: $bg-app;
+  color: $text-primary;
+}
+
+// --- MAIN BOARD ---
+.saas-board {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+  background: var(--coffee-milk);
+}
+
+.board-toolbar {
+  height: 64px;
+  border-bottom: 1px solid var(--border-light);
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  z-index: 40;
+  align-items: center;
+  gap: 12px;
+}
+
+
+// --- NEW HORIZONTAL COMPONENTS ---
+.zone-selector {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  padding: 8px 4px; // Add vertical padding for shadows
+
+  // Hide scrollbar
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  .zone-chip {
+    padding: 8px 16px;
+    border-radius: 20px;
+    background: white;
+    color: var(--coffee-dark);
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 1px solid var(--border-light);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+    position: relative; // For badge
+
+    &:hover {
+      background: var(--coffee-cream);
+      transform: translateY(-1px);
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    }
+
+    &.active {
+      background: var(--coffee-medium, #8B4513);
+      color: white;
+      border-color: transparent;
+      box-shadow: 0 4px 8px rgba(139, 69, 19, 0.25);
+
+      .badgex {
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+      }
+    }
+
+    .badgex {
+      font-size: 0.75rem;
+      background: var(--bg-app);
+      color: var(--text-secondary);
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-weight: 600;
+    }
+  }
+}
+
+.toolbar-stats {
+  display: flex;
+  gap: 24px;
+  margin: 0 24px;
+  border-left: 1px solid var(--border-light);
+  border-right: 1px solid var(--border-light);
+  padding: 0 24px;
+
+  .stat-item {
+    display: flex;
+    flex-direction: column; // Stack icon and number for elegance
+    align-items: center;
+    justify-content: center;
+    min-width: 40px;
+
+    .stat-value {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: $text-primary;
+      line-height: 1;
+    }
+
+    .stat-label {
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      color: $text-secondary;
+      letter-spacing: 0.05em;
+      margin-top: 4px;
+    }
+
+    mat-icon {
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
+      margin-bottom: 2px;
+      opacity: 0.8;
+    }
+
+    .success-icon {
+      color: $success;
+    }
+
+    .danger-icon {
+      color: $danger;
+    }
+  }
+}
+
+.toolbar-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-left: auto; // Push to right
+
+  .edit-tools {
+    display: flex;
+    align-items: center;
+    gap: 8px; // Gap between fabs
+    padding-right: 16px;
+    border-right: 1px solid var(--border-light);
+  }
+
+  .action-fab {
+    width: 36px; // Slightly larger touch target
+    height: 36px;
+    box-shadow: none;
+    background: white;
+    border: 1px solid var(--border-light);
+    color: var(--coffee-dark);
+    transition: all 0.2s;
+
+    &:hover {
+      background: var(--coffee-cream);
+      border-color: var(--coffee-medium);
+    }
+
+    ::ng-deep .mat-mdc-button-touch-target {
+      height: 36px;
+      width: 36px;
+    }
+
+    mat-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+    }
+  }
+
+  .coffee-btn {
+    border-color: var(--coffee-medium);
+    color: var(--coffee-medium);
+    border-radius: 8px;
+    font-weight: 600;
+
+    &:hover {
+      background: rgba(139, 69, 19, 0.05);
+    }
+
+    mat-icon {
+      margin-right: 6px;
+    }
+  }
+}
+
+// --- CANVAS ---
+.board-canvas-wrapper {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  background: var(--coffee-milk, #FFF8F0); // Light Cream Background
+}
+
+.board-canvas {
+  width: 100%;
+  height: 100%;
+  position: relative; // For grid background
+  transform-origin: top left;
+  transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+
+  &.edit-mode {
+    cursor: crosshair;
+  }
+}
+
+.grid-background {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.1; // Subtle grid
+  background-image:
+    linear-gradient(#8B4513 1px, transparent 1px),
+    linear-gradient(90deg, #8B4513 1px, transparent 1px);
+}
+
+// --- TABLE CARDS (SAAS STYLE) ---
+.tables-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none; // Allow drag
+
+  // MOBILE FLOW OVERRIDE
+  &.mobile-flow {
+    pointer-events: auto; // Need scrolling
+    position: relative !important;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+    gap: 16px;
+    padding: 24px;
+    overflow-y: auto;
+    align-content: start;
+    background: var(--coffee-milk);
+
+    .table-card {
+      position: relative !important;
+      transform: none !important;
+      left: auto !important;
+      top: auto !important;
+      width: 100% !important;
+      height: 110px !important; // Fixed height for grid
+      margin: 0;
+    }
+
+    // Hide grid lines in flow mode
+    +.grid-background {
+      display: none;
+    }
+  }
+}
+
+.table-card {
+  position: absolute;
+  z-index: 100;
+  cursor: pointer;
+  pointer-events: auto;
+  user-select: none;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  &:hover {
+    z-index: 1000;
+    transform: scale(1.05);
+
+    .card-inner {
+      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.4);
+      border-color: $border-active;
+    }
+  }
+
+  &.cdk-drag-dragging {
+    z-index: 10000;
+    transform: scale(1.1);
+    opacity: 0.9;
+  }
+}
+
+.card-inner {
+  width: 100%;
+  height: 100%;
+  background: white; // Default
+  border: 1px solid var(--border-light);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+  position: relative;
+  gap: 8px;
+
+  // Shapes
+  &.shape-round {
+    border-radius: 50%;
+    padding: 16px;
+  }
+
+  &.shape-booth {
+    border-radius: 12px;
+    border-bottom: 6px solid rgba(0, 0, 0, 0.2);
+  }
+
+  &.shape-rectangle {
+    width: 140%;
+    margin-left: -20%;
+  }
+}
+
+// --- CONTENT STYLING ---
+.table-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+}
+
+.table-number {
+  font-size: 2rem; // Slightly smaller to fit with timer
+  font-weight: 800;
+  line-height: 1;
+  color: var(--coffee-dark); // Default text
+  font-family: 'Outfit', sans-serif; // Ensure stylish font
+}
+
+.table-time {
+  font-size: 0.85rem;
+  font-weight: 500;
+  opacity: 0.9;
+  margin-top: 4px;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.capacity-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: flex;
+  align-items: center;
+  font-size: 0.75rem;
+  opacity: 0.7;
+  gap: 2px;
+
+  mat-icon {
+    font-size: 14px;
+    width: 14px;
+    height: 14px;
+  }
+}
+
+// --- ACTION BUTTON ---
+.action-btn {
+  width: 100%;
+  height: 32px;
+  border-radius: 16px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--coffee-dark);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  border: none;
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    background: white;
+  }
+}
+
+// --- STATUS COLORS (FULL CARD) ---
+.status-free {
+  .card-inner {
+    background: $success; // Sage Green
+    border-color: transparent;
+
+    .table-number,
+    .table-time,
+    .capacity-badge {
+      color: white;
+    }
+
+    .action-btn {
+      color: $success;
+    }
+  }
+}
+
+.status-occupied {
+  .card-inner {
+    background: $danger; // Sienna Red
+    border-color: transparent;
+    box-shadow: 0 8px 16px rgba($danger, 0.25);
+
+    .table-number,
+    .table-time,
+    .capacity-badge {
+      color: white;
+    }
+
+    .action-btn {
+      color: $danger;
+    }
+  }
+}
+
+.status-waiting,
+.status-paying {
+  .card-inner {
+    background: $warning; // Gold
+    border-color: transparent;
+
+    .table-number,
+    .table-time,
+    .capacity-badge {
+      color: white;
+    }
+
+    .action-btn {
+      color: #8B4513;
+    }
+  }
+}
+
+// SLA Overrides
+.sla-warning .card-inner {
+  border-color: $warning;
+  box-shadow: 0 0 10px rgba($warning, 0.2);
+
+  .timer {
+    color: $warning;
+  }
+}
+
+.sla-danger {
+  animation: pulse-border 2s infinite;
+
+  .card-inner {
+    border-color: $danger;
+    background: rgba($danger, 0.1);
+  }
+
+  .timer {
+    color: $danger;
+    font-weight: 700;
+  }
+}
+
+@keyframes pulse-border {
+  0% {
+    box-shadow: 0 0 0 0 rgba($danger, 0.4);
+  }
+
+  70% {
+    box-shadow: 0 0 0 10px rgba($danger, 0);
+  }
+
+  100% {
+    box-shadow: 0 0 0 0 rgba($danger, 0);
+  }
+}
+
+// SLA Bar
+.sla-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.1);
+
+  .bar-fill {
+    height: 100%;
+    background: $success; // Dynamic via status
+    width: 0;
+    transition: width 1s linear; // Simpler visual
+  }
+}
+
+.status-occupied .bar-fill {
+  background: $success;
+}
+
+.sla-warning .bar-fill {
+  background: $warning;
+}
+
+.sla-danger .bar-fill {
+  background: $danger;
+}
+
+
+// --- PROPERTIES PANEL ---
+.saas-properties {
+  width: 300px;
+  background: $bg-sidebar;
+  border-left: 1px solid rgba(255, 255, 255, 0.1);
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  box-shadow: -10px 0 30px rgba(0, 0, 0, 0.2);
+  color: $text-sidebar;
+
+  .prop-header {
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+
+    h3 {
+      margin: 0;
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--coffee-cream);
+    }
+
+    // Override icon button color for dark sidebar
+    button {
+      color: rgba(255, 255, 255, 0.7);
+    }
+  }
+
+  .prop-content {
+    flex: 1;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .prop-actions {
+    padding: 24px;
+    display: flex;
+    gap: 12px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+
+    button {
+      flex: 1;
+      border-radius: 8px;
+    }
+  }
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  label {
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.6);
+    font-weight: 500;
+  }
+}
+
+// Form Inputs (Dark Theme for Sidebar)
+.saas-input,
+.saas-select {
+  background: rgba(0, 0, 0, 0.2) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 8px 12px;
+  color: white;
+  transition: all 0.2s;
+
+  &:focus {
+    border-color: $accent;
+    outline: none;
+    background: rgba(0, 0, 0, 0.3) !important;
+  }
+}
+
+// --- UTILS ---
+.edit-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  backdrop-filter: blur(2px);
+}
+
+.mini-btn {
+  background: white;
+  color: $primary;
+
+  &.danger {
+    background: $danger;
+    color: white;
+  }
+}
+
+.drop-helper {
+  position: absolute;
+  bottom: 30px;
+  right: 30px;
+  border: 2px dashed $border-active;
+  padding: 20px;
+  border-radius: 12px;
+  color: $text-secondary;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.4);
+}
+
+// Removing default Angular Material styles override
+::ng-deep .mat-mdc-form-field-subscript-wrapper {
+  display: none;
+}

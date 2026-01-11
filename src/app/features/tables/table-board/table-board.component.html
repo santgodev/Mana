@@ -1,0 +1,158 @@
+<div class="saas-container">
+  <!-- MAIN BOARD AREA -->
+  <div class="saas-board">
+    <!-- Header Toolbar -->
+    <div class="board-toolbar">
+      <!-- Zone Selector (Horizontal) -->
+      <div class="zone-selector">
+        <div class="zone-chip" *ngFor="let z of zones" [class.active]="selectedZone?.id === z.id"
+          (click)="selectZone(z)">
+          <span>{{ z.name }}</span>
+          <span class="badgex">{{ z.capacity || '-' }}</span>
+        </div>
+      </div>
+
+      <!-- Center: Stats -->
+      <div class="toolbar-stats d-none d-md-flex">
+        <div class="stat-item" matTooltip="Mesas Libres">
+          <mat-icon class="success-icon">check_circle</mat-icon>
+          <span class="stat-value">{{ getTableCountByStatus('free') }}</span>
+          <span class="stat-label">Libres</span>
+        </div>
+        <div class="stat-item" matTooltip="Mesas Ocupadas">
+          <mat-icon class="danger-icon">restaurant</mat-icon>
+          <span class="stat-value">{{ getTableCountByStatus('occupied') }}</span>
+          <span class="stat-label">Ocupadas</span>
+        </div>
+      </div>
+
+      <!-- Right: Actions -->
+      <div class="toolbar-right">
+        <!-- Edit Tools (Visible only in Edit Mode) -->
+        <div class="edit-tools" *ngIf="isEditMode">
+          <button mat-mini-fab class="action-fab" (click)="addTable(4, 'square')" matTooltip="Mesa 4">4</button>
+          <button mat-mini-fab class="action-fab" (click)="addTable(2, 'round')" matTooltip="Mesa 2">2</button>
+          <button mat-mini-fab class="action-fab" (click)="addTable(6, 'rectangle')" matTooltip="Mesa 6">6</button>
+          <button mat-mini-fab class="action-fab" (click)="addTable(4, 'booth')" matTooltip="Sofá">
+            <mat-icon>weekend</mat-icon>
+          </button>
+          <mat-slide-toggle [(ngModel)]="snapToGrid" class="coffee-toggle">Grid</mat-slide-toggle>
+        </div>
+
+        <div class="main-actions">
+          <button mat-raised-button color="primary" class="coffee-btn" (click)="openCreateTableDialog()"
+            *ngIf="selectedZone">
+            <mat-icon>add</mat-icon>
+            <span class="d-none d-sm-inline">Nueva Mesa</span>
+          </button>
+
+          <button mat-stroked-button class="coffee-btn" (click)="toggleEditMode()">
+            <mat-icon>{{ isEditMode ? 'check' : 'edit_location' }}</mat-icon>
+            <span class="d-none d-sm-inline">{{ isEditMode ? 'Guardar' : 'Editar' }}</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- CANVAS -->
+    <div class="board-canvas-wrapper" #boardContainer>
+      <div class="board-canvas" [style.transform]="'scale(' + scaleFactor + ')'" [class.edit-mode]="isEditMode">
+
+        <!-- Grid Background -->
+        <div class="grid-background" *ngIf="showGrid" [style.background-size]="gridSize + 'px ' + gridSize + 'px'">
+        </div>
+
+        <!-- TABLES -->
+        <div class="tables-container" [class.mobile-flow]="isMobileLayout">
+          <div class="table-card" *ngFor="let table of tables; trackBy: trackByTableId" cdkDrag
+            [cdkDragDisabled]="!isEditMode || isMobileLayout"
+            [cdkDragFreeDragPosition]="isMobileLayout ? {x:0, y:0} : getTablePosition(table)"
+            (cdkDragEnded)="onDragEnded($event, table)" [style.width.px]="tableSize" [style.height.px]="tableSize"
+            [class]="'status-' + table.status" [class.sla-warning]="getSLAStatus(table) === 'warning'"
+            [class.sla-danger]="getSLAStatus(table) === 'danger'" (click)="handleTableClick(table)"
+            (dblclick)="isEditMode ? openTableDetails(table) : null" cdkDragBoundary=".board-canvas">
+
+            <div class="card-inner" [class]="'shape-' + (table.shape || 'square')">
+
+              <!-- Large Centered Number -->
+              <div class="table-content">
+                <span class="table-number">{{ table.number }}</span>
+                <div class="table-time" *ngIf="table.status !== 'free'">
+                  {{ formatDuration(getTableDuration(table)) }}
+                </div>
+              </div>
+
+              <!-- Action Button Removed to prevent overflow - Card click handles action -->
+
+
+              <!-- Optional: Capacity Icon top right -->
+
+
+              <!-- SLA Bar -->
+              <div class="sla-bar" *ngIf="table.status !== 'free'">
+                <div class="bar-fill" [style.width]="'100%'"></div>
+              </div>
+
+              <!-- Edit Actions -->
+              <div class="edit-overlay" *ngIf="isEditMode">
+                <button mat-icon-button class="mini-btn" (click)="editTable(table)"><mat-icon>edit</mat-icon></button>
+                <button mat-icon-button class="mini-btn danger"
+                  (click)="deleteTable(table)"><mat-icon>delete</mat-icon></button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Drop Zone for Edit Mode -->
+        <div class="drop-helper" *ngIf="isEditMode">
+          <mat-icon>add_location</mat-icon>
+          <p>Arrastra mesas nuevas aquí</p>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT PROPERTIES SIDEBAR -->
+  <div class="saas-properties" *ngIf="selectedTable && isEditMode">
+    <div class="prop-header">
+      <h3>Mesa</h3>
+      <button mat-icon-button (click)="cancelTableChanges()"><mat-icon>close</mat-icon></button>
+    </div>
+
+    <div class="prop-content">
+      <div class="form-group">
+        <label>Número</label>
+        <input matInput [(ngModel)]="selectedTable.number" class="saas-input">
+      </div>
+      <div class="form-group">
+        <label>Capacidad</label>
+        <input matInput type="number" [(ngModel)]="selectedTable.capacity" class="saas-input">
+      </div>
+      <div class="form-group">
+        <label>Forma</label>
+        <mat-select [(ngModel)]="selectedTable.shape" class="saas-select">
+          <mat-option value="square">Cuadrada</mat-option>
+          <mat-option value="round">Redonda</mat-option>
+          <mat-option value="rectangle">Rectangular</mat-option>
+          <mat-option value="booth">Sofá (Booth)</mat-option>
+        </mat-select>
+      </div>
+      <div class="form-group">
+        <label>Cambiar Zona</label>
+        <mat-select class="saas-select" [value]="selectedZone?.id" disabled>
+          <mat-option *ngFor="let z of zones" [value]="z.id">{{ z.name }}</mat-option>
+        </mat-select>
+      </div>
+    </div>
+    <div class="prop-actions">
+      <button mat-stroked-button color="warn" (click)="deleteTable(selectedTable)">Eliminar</button>
+    </div>
+  </div>
+
+  <!-- Table Details Panel (Overlay/Sidebar for Operations) -->
+  <app-table-details *ngIf="selectedTable && !isEditMode" [table]="selectedTable" (close)="closeTableDetails()"
+    (tableUpdated)="onTableUpdated($event)">
+  </app-table-details>
+
+</div>

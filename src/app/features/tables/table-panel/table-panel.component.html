@@ -1,0 +1,210 @@
+<div class="table-panel-container">
+  <!-- Header con estadísticas -->
+  <div class="panel-header">
+    <div class="header-content">
+      <div class="title-section">
+        <h1 class="panel-title">
+          <mat-icon>table_restaurant</mat-icon>
+          Gestión de Mesas
+        </h1>
+        <p class="panel-subtitle">Administra las mesas y reservas de tu café</p>
+      </div>
+
+      <div class="stats-section">
+        <div class="stat-card" *ngFor="let stat of (stats$ | async)">
+          <div class="stat-icon" [class]="getStatIconClass(stat.key)">
+            <mat-icon>{{ getStatIcon(stat.key) }}</mat-icon>
+          </div>
+          <div class="stat-content">
+            <h3 class="stat-value">{{ stat.value }}</h3>
+            <p class="stat-label">{{ stat.label }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="actions-section">
+      <button mat-raised-button color="primary" (click)="openTableDialog()" class="action-button">
+        <mat-icon>add</mat-icon>
+        Nueva Mesa
+      </button>
+
+      <button mat-stroked-button (click)="toggleView()" class="view-toggle">
+        <mat-icon>{{ isGridView ? 'view_list' : 'grid_view' }}</mat-icon>
+        {{ isGridView ? 'Vista Lista' : 'Vista Grilla' }}
+      </button>
+    </div>
+  </div>
+
+  <!-- Filtros -->
+  <div class="filters-section">
+    <mat-card class="filters-card">
+      <mat-card-content>
+        <div class="filters-row">
+          <mat-form-field appearance="outline" class="filter-field">
+            <mat-label>Filtrar por estado</mat-label>
+            <mat-select [(ngModel)]="selectedStatus" (selectionChange)="filterTables()">
+              <mat-option value="">Todos los estados</mat-option>
+              <mat-option value="free">Disponibles</mat-option>
+              <mat-option value="occupied">Ocupadas</mat-option>
+              <mat-option value="reserved">Reservadas</mat-option>
+              <mat-option value="maintenance">Mantenimiento</mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="filter-field">
+            <mat-label>Filtrar por Zona</mat-label>
+            <mat-select [(ngModel)]="selectedZoneId" (selectionChange)="filterTables()">
+              <mat-option value="">Todas las zonas</mat-option>
+              <mat-option *ngFor="let zone of (zones$ | async)" [value]="zone.id">
+                {{ zone.name }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <button mat-stroked-button (click)="clearFilters()" class="clear-filters">
+            <mat-icon>clear</mat-icon>
+            Limpiar Filtros
+          </button>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <!-- Vista de Mesas -->
+  <div class="tables-section">
+    <!-- Vista de Grilla -->
+    <div class="tables-grid" *ngIf="isGridView">
+      <mat-card *ngFor="let table of filteredTables" class="table-card" [class]="'status-' + table.status"
+        (click)="table.status === 'free' ? openTable(table) : null">
+        <mat-card-header>
+          <mat-icon mat-card-avatar [fontIcon]="getStatusIcon(table.status)"></mat-icon>
+          <mat-card-title>Mesa {{ table.number }}</mat-card-title>
+          <mat-card-subtitle>{{ getStatusText(table.status) }}</mat-card-subtitle>
+        </mat-card-header>
+
+        <mat-card-content>
+          <div class="table-info">
+            <div class="info-item">
+              <mat-icon>people</mat-icon>
+              <span>{{ table.capacity }} personas</span>
+            </div>
+          </div>
+
+          <!-- Información de orden actual -->
+          <div class="current-order" *ngIf="table.currentOrder">
+            <div class="order-header">
+              <mat-icon>receipt</mat-icon>
+              <span>Orden Activa</span>
+            </div>
+            <div class="order-info">
+              <p class="customer-name">{{ table.currentOrder.customerName }}</p>
+              <p class="order-total">Total: ${{ table.currentOrder.total | number:'1.2-2' }}</p>
+            </div>
+          </div>
+
+          <!-- Información de reserva -->
+          <div class="reservation-info" *ngIf="table.reservation">
+            <div class="reservation-header">
+              <mat-icon>event</mat-icon>
+              <span>Reservada</span>
+            </div>
+            <div class="reservation-details">
+              <p class="customer-name">{{ table.reservation.customerName }}</p>
+              <p class="reservation-time">{{ table.reservation.startTime }} - {{ table.reservation.endTime }}</p>
+            </div>
+          </div>
+        </mat-card-content>
+
+        <mat-card-actions class="table-actions">
+          <button mat-icon-button (click)="openTable(table)" *ngIf="table.status === 'free'" matTooltip="Abrir Mesa"
+            class="action-btn open">
+            <mat-icon>play_arrow</mat-icon>
+          </button>
+
+          <button mat-icon-button (click)="closeTable(table)" *ngIf="table.status === 'occupied'"
+            matTooltip="Cerrar Mesa" class="action-btn close">
+            <mat-icon>stop</mat-icon>
+          </button>
+
+          <button mat-icon-button (click)="editTable(table)" matTooltip="Editar Mesa" class="action-btn edit">
+            <mat-icon>edit</mat-icon>
+          </button>
+        </mat-card-actions>
+      </mat-card>
+    </div>
+
+    <!-- Vista de Lista -->
+    <div class="tables-list" *ngIf="!isGridView">
+      <mat-card class="list-card">
+        <mat-card-content>
+          <div class="list-header">
+            <div class="list-column">Mesa</div>
+            <div class="list-column">Estado</div>
+            <div class="list-column">Capacidad</div>
+            <div class="list-column">Cliente</div>
+            <div class="list-column">Acciones</div>
+          </div>
+
+          <div class="list-row" *ngFor="let table of filteredTables">
+            <div class="list-cell">
+              <div class="table-number">{{ table.number }}</div>
+              <div class="table-name">Mesa {{ table.number }}</div>
+            </div>
+
+            <div class="list-cell">
+              <div class="table-status" [class]="'status-' + table.status">
+                <mat-icon>{{ getStatusIcon(table.status) }}</mat-icon>
+                <span>{{ getStatusText(table.status) }}</span>
+              </div>
+            </div>
+
+            <div class="list-cell">
+              <div class="capacity-info">
+                <mat-icon>people</mat-icon>
+                <span>{{ table.capacity }}</span>
+              </div>
+            </div>
+
+            <div class="list-cell">
+              <div class="customer-info" *ngIf="table.currentOrder">
+                <p class="customer-name">{{ table.currentOrder.customerName }}</p>
+                <p class="order-total">${{ table.currentOrder.total | number:'1.2-2' }}</p>
+              </div>
+              <div class="reservation-info" *ngIf="table.reservation">
+                <p class="customer-name">{{ table.reservation.customerName }}</p>
+                <p class="reservation-time">{{ table.reservation.startTime }}</p>
+              </div>
+              <span class="no-customer" *ngIf="!table.currentOrder && !table.reservation">-</span>
+            </div>
+
+            <div class="list-cell">
+              <div class="action-buttons">
+                <button mat-icon-button (click)="openTable(table)" *ngIf="table.status === 'free'"
+                  matTooltip="Abrir Mesa" class="action-btn open">
+                  <mat-icon>play_arrow</mat-icon>
+                </button>
+
+                <button mat-icon-button (click)="closeTable(table)" *ngIf="table.status === 'occupied'"
+                  matTooltip="Cerrar Mesa" class="action-btn close">
+                  <mat-icon>stop</mat-icon>
+                </button>
+
+                <button mat-icon-button (click)="editTable(table)" matTooltip="Editar Mesa" class="action-btn edit">
+                  <mat-icon>edit</mat-icon>
+                </button>
+              </div>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+
+  <!-- Mensaje cuando no hay mesas -->
+  <div class="no-tables" *ngIf="filteredTables.length === 0">
+    <mat-icon>table_restaurant</mat-icon>
+    <h3>No hay mesas disponibles</h3>
+    <p>Ajusta los filtros o crea una nueva mesa</p>
+  </div>
+</div>

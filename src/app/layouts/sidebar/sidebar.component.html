@@ -1,0 +1,76 @@
+<div class="sidebar-content">
+  <!-- Logo/Brand -->
+  <div class="sidebar-header">
+    <div class="brand-text-container">
+      <h2 class="brand-title">
+        <mat-icon>local_cafe</mat-icon>
+        Christ on the table
+      </h2>
+    </div>
+  </div>
+
+  <!-- Navigation Menu -->
+  <mat-nav-list class="nav-list">
+    <a mat-list-item routerLink="/tables" routerLinkActive="active">
+      <mat-icon matListItemIcon>table_restaurant</mat-icon>
+      <span matListItemTitle>Zonas</span>
+    </a>
+
+    <a mat-list-item routerLink="/tables/list" routerLinkActive="active">
+      <mat-icon matListItemIcon>list</mat-icon>
+      <span matListItemTitle>Lista de mesas</span>
+    </a>
+
+    <a mat-list-item routerLink="/dashboard" routerLinkActive="active">
+      <mat-icon matListItemIcon>dashboard</mat-icon>
+      <span matListItemTitle>Dashboard</span>
+    </a>
+
+
+
+    <a mat-list-item routerLink="/inventory" routerLinkActive="active">
+      <mat-icon matListItemIcon>warehouse</mat-icon>
+      <span matListItemTitle>Inventario</span>
+    </a>
+
+    <a mat-list-item routerLink="/caja" routerLinkActive="active">
+      <mat-icon matListItemIcon>point_of_sale</mat-icon>
+      <span matListItemTitle>Caja</span>
+    </a>
+
+    <a mat-list-item routerLink="/sales" routerLinkActive="active">
+      <mat-icon matListItemIcon>point_of_sale</mat-icon>
+      <span matListItemTitle>Ventas</span>
+    </a>
+
+    <a mat-list-item routerLink="/reports" routerLinkActive="active">
+      <mat-icon matListItemIcon>assessment</mat-icon>
+      <span matListItemTitle>Reportes</span>
+    </a>
+
+    <a mat-list-item routerLink="/kitchen" routerLinkActive="active">
+      <mat-icon matListItemIcon>soup_kitchen</mat-icon>
+      <span matListItemTitle>Cocina</span>
+    </a>
+
+    <a mat-list-item routerLink="/stations" routerLinkActive="active">
+      <mat-icon matListItemIcon>storefront</mat-icon> <!-- Or 'room_service' or 'kitchen' -->
+      <span matListItemTitle>Estaciones</span>
+    </a>
+
+    <!-- Pricing Calculator (Public/Landing) -->
+    <a mat-list-item routerLink="/pricing" routerLinkActive="active">
+      <mat-icon matListItemIcon>calculate</mat-icon>
+      <span matListItemTitle>Calculadora</span>
+    </a>
+
+    <!-- Divider -->
+    <mat-divider class="sidebar-divider"></mat-divider>
+
+    <!-- Settings -->
+    <a mat-list-item routerLink="/settings" routerLinkActive="active">
+      <mat-icon matListItemIcon>settings</mat-icon>
+      <span matListItemTitle>Configuración</span>
+    </a>
+  </mat-nav-list>
+</div>

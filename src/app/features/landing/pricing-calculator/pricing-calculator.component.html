@@ -1,0 +1,213 @@
+<div class="calculator-container">
+
+    <!-- Header -->
+    <header class="calculator-header">
+        <h1>Calcula tu Inversión en <span class="brand-name">Maná</span></h1>
+        <p class="subtitle">Paga solo por lo que tu restaurante necesita. Sin costos ocultos.</p>
+    </header>
+
+    <div class="calculator-grid">
+
+        <!-- Controls Section -->
+        <div class="controls-column">
+
+            <!-- Core Resources Card -->
+            <mat-card class="config-card">
+                <mat-card-header>
+                    <mat-card-title>Capacidad del Restaurante</mat-card-title>
+                </mat-card-header>
+                <mat-card-content>
+
+                    <!-- Tables Slider -->
+                    <div class="control-group">
+                        <div class="label-row">
+                            <span class="label">Mesas Activas</span>
+                            <span class="value-badge">{{ tableCount }}</span>
+                        </div>
+                        <mat-slider min="1" max="100" step="1" showTickMarks discrete [displayWith]="formatLabel">
+                            <input matSliderThumb [(ngModel)]="tableCount">
+                        </mat-slider>
+                        <div class="helper-text">
+                            <small *ngIf="tableCount <= 10">Included in base plan via free tier (1-10)</small>
+                            <small *ngIf="tableCount > 10">+${{ (tableCount - 10) * 2000 | number }} COP ({{ tableCount
+                                - 10 }} extra x $2k)</small>
+                        </div>
+                    </div>
+
+                    <div class="divider"></div>
+
+                    <!-- Staff Counter -->
+                    <div class="control-group row-group">
+                        <div class="text-col">
+                            <span class="label">Usuarios / Empleados</span>
+                            <small>Meseros, cajeros y admins.</small>
+                        </div>
+                        <div class="counter-control">
+                            <button mat-icon-button (click)="decrement('userCount')" [disabled]="userCount <= 1">
+                                <mat-icon>remove</mat-icon>
+                            </button>
+                            <span class="counter-value">{{ userCount }}</span>
+                            <button mat-icon-button (click)="increment('userCount')">
+                                <mat-icon>add</mat-icon>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Zones Counter -->
+                    <div class="control-group row-group">
+                        <div class="text-col">
+                            <span class="label">Zonas / Ambientes</span>
+                            <small>Salón, Terraza, VIP...</small>
+                        </div>
+                        <div class="counter-control">
+                            <button mat-icon-button (click)="decrement('zoneCount')" [disabled]="zoneCount <= 1">
+                                <mat-icon>remove</mat-icon>
+                            </button>
+                            <span class="counter-value">{{ zoneCount }}</span>
+                            <button mat-icon-button (click)="increment('zoneCount')">
+                                <mat-icon>add</mat-icon>
+                            </button>
+                        </div>
+                    </div>
+
+                </mat-card-content>
+            </mat-card>
+
+            <!-- Features Included Card -->
+            <mat-card class="config-card features-card">
+                <mat-card-header>
+                    <mat-card-title>Todo incluido en el Plan Base</mat-card-title>
+                </mat-card-header>
+                <mat-card-content>
+                    <div class="features-grid">
+                        <div class="feature-item">
+                            <mat-icon>point_of_sale</mat-icon>
+                            <span>Caja Registradora</span>
+                        </div>
+                        <div class="feature-item">
+                            <mat-icon>table_restaurant</mat-icon>
+                            <span>Gestión de Mesas</span>
+                        </div>
+                        <div class="feature-item">
+                            <mat-icon>receipt_long</mat-icon>
+                            <span>Toma de Pedidos</span>
+                        </div>
+                        <div class="feature-item">
+                            <mat-icon>dashboard</mat-icon>
+                            <span>Dashboard Diario</span>
+                        </div>
+                        <div class="feature-item">
+                            <mat-icon>people</mat-icon>
+                            <span>Hasta 3 Usuarios</span>
+                        </div>
+                        <div class="feature-item">
+                            <mat-icon>storefront</mat-icon>
+                            <span>1 Zona / Ambiente</span>
+                        </div>
+                    </div>
+                </mat-card-content>
+            </mat-card>
+
+            <!-- Add-ons Card -->
+            <mat-card class="config-card addons-card">
+                <mat-card-header>
+                    <mat-card-title>Módulos Adicionales</mat-card-title>
+                </mat-card-header>
+                <mat-card-content class="modules-list">
+
+                    <div class="module-item">
+                        <mat-slide-toggle [(ngModel)]="selectedModules.inventory" color="primary">
+                            <div class="toggle-label">
+                                <span class="name">Control de Inventario</span>
+                                <span class="price">+$20.000 COP</span>
+                            </div>
+                        </mat-slide-toggle>
+                        <p class="description">Recetas, control de stock, alertas de insumos.</p>
+                    </div>
+
+                    <div class="module-item">
+                        <mat-slide-toggle [(ngModel)]="selectedModules.kds" color="primary">
+                            <div class="toggle-label">
+                                <span class="name">Pantalla de Cocina (KDS)</span>
+                                <span class="price">+$15.000 COP</span>
+                            </div>
+                        </mat-slide-toggle>
+                        <p class="description">Gestión de pedidos en tiempo real para cocineros. Ahorra papel.</p>
+                    </div>
+
+                    <div class="module-item">
+                        <mat-slide-toggle [(ngModel)]="selectedModules.analytics" color="primary">
+                            <div class="toggle-label">
+                                <span class="name">Analítica Avanzada</span>
+                                <span class="price">+$15.000 COP</span>
+                            </div>
+                        </mat-slide-toggle>
+                        <p class="description">Reportes históricos, mapas de calor y exportación de datos.</p>
+                    </div>
+
+                    <div class="module-item">
+                        <mat-slide-toggle [(ngModel)]="selectedModules.multibranch" color="primary">
+                            <div class="toggle-label">
+                                <span class="name">Multisede / Franquicia</span>
+                                <span class="price">+$40.000 COP</span>
+                            </div>
+                        </mat-slide-toggle>
+                        <p class="description">Gestión centralizada para cadenas de restaurantes.</p>
+                    </div>
+
+                </mat-card-content>
+            </mat-card>
+
+        </div>
+
+        <!-- Summary Column (Sticky) -->
+        <div class="summary-column">
+            <mat-card class="price-card">
+                <mat-card-content>
+                    <h2 class="tier-name">{{ planTierName }}</h2>
+                    <div class="total-price">
+                        <span class="currency">$</span>
+                        <span class="amount">{{ estimatedTotal | number }}</span>
+                        <span class="period">/ mes</span>
+                    </div>
+
+                    <div class="breakdown">
+                        <div class="line-item">
+                            <span>Plan Base (10 Mesas)</span>
+                            <span>${{ BASE_PRICE | number }}</span>
+                        </div>
+
+                        <div class="line-item" *ngIf="extraTablesCost > 0">
+                            <span class="highlight">+ {{ tableCount - 10 }} Mesas extra</span>
+                            <span>${{ extraTablesCost | number }}</span>
+                        </div>
+
+                        <div class="line-item" *ngIf="extraUsersCost > 0">
+                            <span class="highlight">+ {{ userCount - 3 }} Usuarios extra</span>
+                            <span>${{ extraUsersCost | number }}</span>
+                        </div>
+
+                        <div class="line-item" *ngIf="extraZonesCost > 0">
+                            <span class="highlight">+ {{ zoneCount - 1 }} Zonas extra</span>
+                            <span>${{ extraZonesCost | number }}</span>
+                        </div>
+
+                        <div class="line-item" *ngIf="modulesCost > 0">
+                            <span class="highlight">Módulos Premium</span>
+                            <span>${{ modulesCost | number }}</span>
+                        </div>
+                    </div>
+
+                    <div class="actions">
+                        <button mat-flat-button color="primary" class="cta-button">
+                            Comenzar Prueba Gratis
+                        </button>
+                        <p class="disclaimer">Cancela cuando quieras.</p>
+                    </div>
+
+                </mat-card-content>
+            </mat-card>
+        </div>
+
+    </div>
+</div>

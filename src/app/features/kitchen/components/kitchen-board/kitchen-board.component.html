@@ -1,0 +1,93 @@
+<div class="kds-container">
+    <!-- Top Bar -->
+    <div class="kds-header">
+        <div class="brand">
+            <mat-icon>restaurant_menu</mat-icon>
+            <h1>Tablero de Cocina</h1>
+        </div>
+
+        <div class="station-filter">
+            <mat-chip-listbox aria-label="Station Selection" [value]="selectedStationId"
+                (change)="onStationChange($event)">
+                <mat-chip-option value="all" selected color="accent">Todos</mat-chip-option>
+                <mat-chip-option *ngFor="let station of stations$ | async" [value]="station.id" color="primary">
+                    {{ station.name }}
+                </mat-chip-option>
+            </mat-chip-listbox>
+        </div>
+
+        <div class="actions">
+            <button mat-icon-button color="warn" (click)="clearAll()" matTooltip="Limpiar Pantalla">
+                <mat-icon>delete_sweep</mat-icon>
+            </button>
+        </div>
+    </div>
+
+    <!-- Stats / Info Bar (Optional) -->
+    <div class="kds-stats" *ngIf="orders.length > 0">
+        <span>Pendientes: <strong>{{ orders.length }}</strong></span>
+    </div>
+
+    <!-- Orders Grid -->
+    <div class="kds-grid">
+        <div *ngFor="let order of orders; trackBy: trackByOrderId" class="kds-card" [ngClass]="getPriority(order)">
+
+            <div class="card-header">
+                <div class="table-info">
+                    <span class="label">Mesa</span>
+                    <span class="number">{{ order.table?.number || '?' }}</span>
+                </div>
+                <div class="timer-badge">
+                    <mat-icon>timer</mat-icon>
+                    {{ getElapsedTime(order.created_at) }}
+                </div>
+            </div>
+
+            <div class="card-body">
+                <div class="order-meta">
+                    <span class="order-id">#{{ order.id.substring(0,4) }}</span>
+                    <span class="waiter" *ngIf="order.waiter_id">Mesero: {{ order.waiter_id.substring(0,4) }}</span>
+                </div>
+
+                <mat-divider></mat-divider>
+
+                <div class="items-list">
+                    <div *ngFor="let item of order.order_items" class="item-row"
+                        [class.dimmed]="!isItemForCurrentStation(item)" [class.ready]="item.status === 'ready'"
+                        (click)="toggleItemStatus(item)">
+
+                        <!-- Checkbox Logic (Only enable if it's my station or I'm viewing All) -->
+                        <div class="status-indicator">
+                            <mat-icon *ngIf="item.status === 'ready'">check_circle</mat-icon>
+                            <mat-icon *ngIf="item.status !== 'ready'"
+                                class="radio-off">radio_button_unchecked</mat-icon>
+                        </div>
+
+                        <div class="item-details">
+                            <span class="qty">{{ item.quantity }}x</span>
+                            <span class="name">{{ item.products?.name }}</span>
+                            <span class="notes" *ngIf="item.notes">{{ item.notes }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-footer">
+                <!-- Convenience Button: Mark All MINE Ready -->
+                <button mat-flat-button color="primary" class="btn-block" (click)="markStationItemsReady(order)">
+                    <mat-icon>done_all</mat-icon> ESTACIÓN LISTA
+                </button>
+            </div>
+
+            <!-- Progress Bar -->
+            <div class="progress-line" [style.width]="getOrderProgress(order) + '%'"></div>
+        </div>
+
+        <!-- Empty State -->
+        <div *ngIf="orders.length === 0" class="empty-state">
+            <div class="illustration">🍳</div>
+            <h2>Todo Limpio</h2>
+            <p>Esperando nuevos pedidos...</p>
+        </div>
+    </div>
+</div>
