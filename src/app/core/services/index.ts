@@ -10,3 +10,4 @@ export * from './kitchen.service';
 export * from './client-cart.service';
 export * from './order.service';
 export * from './station.service';
+export * from './report.service';

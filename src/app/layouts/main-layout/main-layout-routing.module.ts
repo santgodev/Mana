@@ -34,12 +34,6 @@ const routes: Routes = [
         loadChildren: () => import('../../features/cash-register/cash-register.module').then(m => m.CashRegisterModule)
       },
       {
-        path: 'sales',
-        canActivate: [RoleGuard],
-        data: { roles: ['admin'] },
-        loadChildren: () => import('../../features/sales/sales.module').then(m => m.SalesModule)
-      },
-      {
         path: 'reports',
         canActivate: [RoleGuard],
         data: { roles: ['admin'] },

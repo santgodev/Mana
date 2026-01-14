@@ -1,19 +1,95 @@
 <div class="reports-container">
   <div class="page-header">
-    <h1 class="page-title">
-      <mat-icon>assessment</mat-icon>
-      Reportes y Análisis
-    </h1>
+    <div class="header-content">
+      <h1 class="page-title">
+        <mat-icon>assessment</mat-icon>
+        Reportes y Análisis
+      </h1>
+      <p class="subtitle">Resumen de rendimiento - {{ currentDate | date:'MMMM yyyy' }}</p>
+    </div>
+    <button mat-flat-button color="primary" (click)="loadStats()" [disabled]="isLoading">
+      <mat-icon>{{ isLoading ? 'hourglass_empty' : 'refresh' }}</mat-icon>
+      Actualizar
+    </button>
   </div>
 
-  <mat-card class="coming-soon-card">
-    <mat-card-content>
-      <div class="coming-soon-content">
-        <mat-icon class="coming-soon-icon">construction</mat-icon>
-        <h2>Próximamente</h2>
-        <p>Esta funcionalidad estará disponible en una próxima actualización.</p>
-        <p>Aquí podrás generar reportes de ventas, inventario y análisis de datos.</p>
-      </div>
-    </mat-card-content>
-  </mat-card>
+  <div *ngIf="isLoading" class="loading-overlay">
+    <mat-icon class="spinner">hourglass_empty</mat-icon>
+    <p>Calculando analíticas...</p>
+  </div>
+
+  <div *ngIf="!isLoading && stats" class="dashboard-grid">
+    <!-- KPI Cards -->
+    <div class="kpi-grid">
+      <mat-card class="kpi-card sales">
+        <mat-card-content>
+          <div class="kpi-icon">
+            <mat-icon>payments</mat-icon>
+          </div>
+          <div class="kpi-data">
+            <span class="label">Ventas Totales</span>
+            <h2 class="value">{{ stats.totalSales | currency:'CAD':'symbol-narrow':'1.0-0' }}</h2>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="kpi-card orders">
+        <mat-card-content>
+          <div class="kpi-icon">
+            <mat-icon>shopping_bag</mat-icon>
+          </div>
+          <div class="kpi-data">
+            <span class="label">Pedidos Totales</span>
+            <h2 class="value">{{ stats.orderCount }}</h2>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="kpi-card ticket">
+        <mat-card-content>
+          <div class="kpi-icon">
+            <mat-icon>receipt_long</mat-icon>
+          </div>
+          <div class="kpi-data">
+            <span class="label">Ticket Promedio</span>
+            <h2 class="value">{{ stats.averageTicket | currency:'CAD':'symbol-narrow':'1.0-0' }}</h2>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <!-- Top Products Section -->
+    <div class="section-container">
+      <mat-card class="table-card">
+        <mat-card-header>
+          <mat-card-title>
+            <mat-icon>trending_up</mat-icon>
+            Top 5 Productos más Vendidos
+          </mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="top-products-list">
+            <div *ngFor="let product of stats.topProducts; let i = index" class="product-item">
+              <div class="rank">{{ i + 1 }}</div>
+              <div class="product-info">
+                <span class="name">{{ product.name }}</span>
+                <span class="revenue">{{ product.totalRevenue | currency:'CAD':'symbol-narrow':'1.0-0' }}</span>
+              </div>
+              <div class="quantity-badge">
+                {{ product.quantity }} u.
+              </div>
+              <div class="progress-bar-container">
+                <div class="progress-bar" [style.width.%]="(product.totalRevenue / stats.totalSales) * 100 * 5"></div>
+              </div>
+            </div>
+          </div>
+
+          <div *ngIf="stats.topProducts.length === 0" class="empty-state">
+            <mat-icon>query_stats</mat-icon>
+            <p>No hay datos de ventas para este mes todavía.</p>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
 </div>
