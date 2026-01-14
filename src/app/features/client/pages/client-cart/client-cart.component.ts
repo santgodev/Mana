@@ -36,7 +36,12 @@ import { TranslatePipe } from '../../../../core/pipes/translate.pipe';
         <p *ngIf="tableId">{{ 'TABLE' | translate }} {{ tableId.substring(0,4) }}... (ID)</p>
       </div>
       
-      <div class="empty-state" *ngIf="cart.length === 0 && confirmedItems.length === 0">
+      <div class="loading-state-center" *ngIf="isInitialLoading">
+        <div class="spinner"></div>
+        <p>Cargando tu cuenta...</p>
+      </div>
+
+      <div class="empty-state" *ngIf="!isInitialLoading && cart.length === 0 && confirmedItems.length === 0">
         <div class="empty-icon-circle">
             <mat-icon>restaurant_menu</mat-icon>
         </div>
@@ -136,6 +141,24 @@ import { TranslatePipe } from '../../../../core/pipes/translate.pipe';
     .page-header { margin-bottom: 24px; text-align: center; }
     .page-header h1 { font-weight: 800; color: #2C1810; margin: 0; font-size: 1.8rem; }
     .page-header p { color: #8c8c8c; margin: 4px 0 0; font-size: 0.9rem; }
+    
+    .loading-state-center {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 50px 0;
+        gap: 16px;
+    }
+    .spinner {
+      width: 40px; 
+      height: 40px;
+      border: 4px solid #eee;
+      border-top-color: #D4AF37;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin { 100% { transform: rotate(360deg); } }
 
     .empty-state {
         display: flex;
@@ -146,7 +169,7 @@ import { TranslatePipe } from '../../../../core/pipes/translate.pipe';
     }
     .empty-icon-circle {
         width: 80px; height: 80px; background: #e0e0e0; border-radius: 50%;
-        display: flex; alignItems: center; justify-content: center;
+        display: flex; align-items: center; justify-content: center;
         color: #fff;
     }
     .empty-icon-circle mat-icon { font-size: 40px; width: 40px; height: 40px; }
@@ -321,6 +344,7 @@ export class ClientCartComponent implements OnInit {
     grandTotal = 0;
 
     isProcessing = false;
+    isInitialLoading = true;
     tableId: string | null = null;
 
     constructor(
@@ -342,8 +366,8 @@ export class ClientCartComponent implements OnInit {
             if (id) {
                 this.tableId = id;
                 this.cartService.setTableId(id); // Sync service
-                // DO NOT Load confirmed items (User request: only show new order)
-                // this.loadConfirmedItems(id);
+                // Load confirmed items (Previously ordered)
+                this.loadConfirmedItems(id);
             }
         });
 
@@ -362,9 +386,15 @@ export class ClientCartComponent implements OnInit {
     }
 
     async loadConfirmedItems(tableId: string) {
-        // Keep method for potential future toggle, but don't call it automatically
-        this.confirmedItems = await this.orderService.getActiveOrderItems(tableId);
-        this.calculateTotals();
+        try {
+            this.isInitialLoading = true;
+            this.confirmedItems = await this.orderService.getActiveOrderItems(tableId);
+            this.calculateTotals();
+        } catch (error) {
+            console.error('Error loading confirmed items', error);
+        } finally {
+            this.isInitialLoading = false;
+        }
     }
 
     calculateTotals() {

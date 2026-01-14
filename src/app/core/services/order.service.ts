@@ -27,19 +27,47 @@ export class OrderService {
 
         const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(tableId);
 
-        // Fetch table details to get ID and Current Session
+        // Fetch table details to get ID, Current Session and Status
         const { data: tableData, error: tableError } = await this.supabase.client
             .from('tables')
-            .select('id, current_session_id')
+            .select('id, current_session_id, status')
             .eq(isUuid ? 'id' : 'number', tableId)
             .single();
 
         if (tableError || !tableData) {
-            console.error('Error finding table:', tableError);
             throw new Error(`Mesa ${tableId} no encontrada.`);
         }
         resolvedTableId = tableData.id;
         pSessionId = tableData.current_session_id;
+
+        // 2. AUTO-OPEN: If table is free, create a session
+        if (tableData.status === 'free' || !pSessionId) {
+            console.log(`[OrderService] Table ${tableId} is free or has no session. Starting new session...`);
+            const { data: newSession, error: sessionErr } = await this.supabase.client
+                .from('table_sessions')
+                .insert({
+                    table_id: resolvedTableId,
+                    status: 'active',
+                    client_count: 1
+                })
+                .select()
+                .single();
+
+            if (!sessionErr && newSession) {
+                pSessionId = newSession.id;
+                // Update table to occupied
+                await this.supabase.client
+                    .from('tables')
+                    .update({
+                        status: 'occupied',
+                        current_session_id: pSessionId
+                    })
+                    .eq('id', resolvedTableId);
+                console.log(`[OrderService] Table ${tableId} is now OCCUPIED with session ${pSessionId}`);
+            } else {
+                // Failed to auto-start session
+            }
+        }
 
         // 2. Create Order linked to Table AND Session
         const { data: orderData, error: orderError } = await this.supabase.client
@@ -120,15 +148,23 @@ export class OrderService {
         }
 
         console.log(`[OrderService] Active session found: ${tableData.current_session_id}`);
-        // 2. Get Orders for this session
+        // 2. Get Orders for this session OR orders for this table without session (orphan orders)
+        // Ensure we handle the case where session_id might be null in the filter string
+        const sessionFilter = tableData.current_session_id
+            ? `session_id.eq.${tableData.current_session_id},session_id.is.null`
+            : `session_id.is.null`;
+
+        console.log(`[OrderService] Using session filter: ${sessionFilter} for table: ${resolvedTableId}`);
+
         const { data: orders, error: ordersError } = await this.supabase.client
             .from('orders')
             .select('id, created_at, status')
             .eq('table_id', resolvedTableId)
-            .eq('session_id', tableData.current_session_id)
-            .neq('status', 'cancelled');
+            .or(sessionFilter)
+            .neq('status', 'cancelled')
+            .neq('status', 'paid');
 
-        console.log(`[OrderService] Found ${orders?.length || 0} orders for session ${tableData.current_session_id}`);
+        console.log(`[OrderService] Found ${orders?.length || 0} active orders for table ${resolvedTableId}`);
         if (ordersError || !orders || orders.length === 0) return [];
 
         const orderIds = orders.map(o => o.id);
@@ -136,18 +172,15 @@ export class OrderService {
     }
 
     private async fetchItemsByIds(orderIds: string[]): Promise<any[]> {
-        console.log(`[OrderService] Fetching items for orders: ${orderIds.join(', ')}`);
         const { data: items, error: itemsError } = await this.supabase.client
             .from('order_items')
             .select('*, product:products(name, price)')
             .in('order_id', orderIds);
 
         if (itemsError) {
-            console.error('[OrderService] Error fetching stored items:', itemsError);
             return [];
         }
 
-        console.log(`[OrderService] Fetched ${items?.length || 0} items.`);
         return items || [];
     }
 }

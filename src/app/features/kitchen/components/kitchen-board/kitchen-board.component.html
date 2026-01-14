@@ -8,7 +8,7 @@
 
         <div class="station-filter" [class.mobile-filters]="isHandset$ | async">
             <!-- Chips for Desktop -->
-            <mat-chip-listbox *ngIf="!(isHandset$ | async)" aria-label="Station Selection" [(value)]="selectedStationId"
+            <mat-chip-listbox *ngIf="!(isHandset$ | async)" aria-label="Station Selection" [value]="selectedStationId"
                 (change)="onStationChange($event)">
                 <mat-chip-option value="all" color="accent">Todos</mat-chip-option>
                 <mat-chip-option *ngFor="let station of stations$ | async" [value]="station.id" color="primary">

@@ -4,11 +4,19 @@
     margin: 0 auto;
     font-family: 'Inter', sans-serif;
     box-sizing: border-box;
+
+    @media (max-width: 600px) {
+        padding: 1rem;
+    }
 }
 
 .calculator-header {
     text-align: center;
     margin-bottom: 3rem;
+
+    @media (max-width: 600px) {
+        margin-bottom: 2rem;
+    }
 
     h1 {
         font-size: 2.5rem;
@@ -16,9 +24,14 @@
         color: var(--coffee-dark); // Brand Dark
         margin-bottom: 0.5rem;
 
+        @media (max-width: 600px) {
+            font-size: 1.8rem;
+        }
+
         .brand-name {
             background: var(--gradient-primary); // Brand Gradient
             -webkit-background-clip: text;
+            background-clip: text;
             -webkit-text-fill-color: transparent;
         }
     }
@@ -26,6 +39,10 @@
     .subtitle {
         font-size: 1.1rem;
         color: var(--text-secondary);
+
+        @media (max-width: 600px) {
+            font-size: 0.95rem;
+        }
     }
 }
 
@@ -234,6 +251,12 @@
     box-shadow: var(--shadow-strong) !important;
     position: relative;
     overflow: hidden;
+
+    @media (max-width: 600px) {
+        padding: 1.5rem 1rem;
+        border-radius: 0; // Full width feel on mobile
+        margin: 0 -1rem; // Bleed to edges
+    }
 
     // Background pattern effect (optional, subtle)
     &::before {

@@ -16,6 +16,8 @@ import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialo
 import { CategoryDialogComponent } from '../components/category-dialog/category-dialog.component';
 import { Category } from '../../../models/supabase.types';
 import { MatChipsModule } from '@angular/material/chips';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 @Component({
   selector: 'app-inventory',
@@ -29,13 +31,15 @@ import { MatChipsModule } from '@angular/material/chips';
     MatFormFieldModule,
     MatButtonModule,
     MatIconModule,
-    MatChipsModule
+    MatChipsModule,
+    MatSlideToggleModule,
+    MatTooltipModule
   ],
   templateUrl: './inventory.component.html',
   styleUrl: './inventory.component.scss'
 })
 export class InventoryComponent implements OnInit {
-  displayedColumns: string[] = ['image', 'name', 'cost', 'price', 'stock', 'actions'];
+  displayedColumns: string[] = ['image', 'name', 'cost', 'price', 'is_available', 'stock', 'actions'];
   dataSource: MatTableDataSource<Product>;
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
@@ -158,5 +162,18 @@ export class InventoryComponent implements OnInit {
   adjustStock(product: Product) {
     // For fast edits, maybe repurpose this for a smaller dialog or just rely on Edit Form
     this.openProductForm(product);
+  }
+
+  toggleAvailability(product: Product, event: any) {
+    const isAvailable = event.checked;
+    this.productService.updateProduct(product.id, { is_available: isAvailable })
+      .then(() => {
+        this.snackBar.open(`${product.name} ${isAvailable ? 'habilitado' : 'deshabilitado'} para venta`, 'Ok', { duration: 2000 });
+      })
+      .catch(err => {
+        console.error('Error updating availability:', err);
+        this.snackBar.open('Error al actualizar disponibilidad', 'Cerrar');
+        // Revert toggle state if error? ProductService sync should handle it but UI might need a local refresh
+      });
   }
 }

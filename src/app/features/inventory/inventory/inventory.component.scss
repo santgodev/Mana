@@ -169,6 +169,26 @@ table {
   }
 }
 
+// 8. Availability Column
+.availability-cell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  .status-label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: color 0.3s;
+
+    &.active {
+      color: #2e7d32;
+    }
+  }
+}
+
 // Paginator
 ::ng-deep .mat-mdc-paginator {
   background: transparent;

@@ -1,41 +1,53 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { SupabaseService } from './supabase.service';
+import { AuthService } from './auth.service';
 import { CashShift, CashTransaction, Order } from '../../models/supabase.types';
 
 @Injectable({
     providedIn: 'root'
 })
 export class CashService {
-    private _currentShift = new BehaviorSubject<CashShift | null>(null);
+    private _currentShift = new BehaviorSubject<CashShift | null | undefined>(undefined);
 
-    constructor(private supabase: SupabaseService) {
-        this.checkOpenShift();
+    constructor(
+        private supabase: SupabaseService,
+        private authService: AuthService
+    ) {
+        // Re-check shift whenever user state changes (Login/Logout/Refresh)
+        this.authService.user$.subscribe(user => {
+            if (user) {
+                this.checkOpenShift();
+            } else {
+                this._currentShift.next(null);
+            }
+        });
     }
 
-    get currentShift$(): Observable<CashShift | null> {
+    get currentShift$(): Observable<CashShift | null | undefined> {
         return this._currentShift.asObservable();
     }
 
     get currentShiftValue(): CashShift | null {
-        return this._currentShift.value;
+        return this._currentShift.value || null;
     }
 
     async checkOpenShift() {
-        // Find a shift that is 'open'
+        // Find the latest shift that is 'open'
         const { data, error } = await this.supabase.client
             .from('cash_shifts')
             .select('*')
             .eq('status', 'open')
-            .maybeSingle(); // Use maybeSingle to avoid 406 error if none found
+            .order('opened_at', { ascending: false })
+            .limit(1);
 
-        if (error && error.code !== 'PGRST116') {
-            console.error('Error checking open shift:', error);
+        if (error) {
             return;
         }
 
-        if (data) {
-            this._currentShift.next(data as CashShift);
+        if (data && data.length > 0) {
+            const shift = data[0] as CashShift;
+            this._currentShift.next(shift);
         } else {
             this._currentShift.next(null);
         }
@@ -144,7 +156,7 @@ export class CashService {
             .gte('updated_at', shift.opened_at);
 
         if (error) {
-            console.error('[CashService] Error fetching sales:', error);
+            // Silently handle or trigger alert
         }
 
         const totalSalesCash = (salesData || [])

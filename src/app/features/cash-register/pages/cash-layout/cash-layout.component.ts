@@ -131,6 +131,7 @@ export class CashLayoutComponent implements OnInit {
 
   ngOnInit(): void {
     this.cashService.currentShift$.subscribe(shift => {
+      if (shift === undefined) return; // Wait for initial check
       this.currentShift = shift;
       this.isLoading = false;
     });

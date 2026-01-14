@@ -7,7 +7,6 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatDividerModule } from '@angular/material/divider';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { AuthService } from '../../../core/services';
 
@@ -24,7 +23,6 @@ import { AuthService } from '../../../core/services';
     MatInputModule,
     MatButtonModule,
     MatIconModule,
-    MatDividerModule,
     MatSnackBarModule
   ]
 })
@@ -33,11 +31,6 @@ export class LoginComponent implements OnInit {
   isLoading = false;
   hidePassword = true;
 
-  demoUsers = [
-    { role: 'admin', username: 'admin' },
-    { role: 'manager', username: 'manager' },
-    { role: 'employee', username: 'employee' }
-  ];
 
   constructor(
     private fb: FormBuilder,
@@ -105,13 +98,4 @@ export class LoginComponent implements OnInit {
     }
   }
 
-  fillDemoCredentials(role: string): void {
-    const user = this.demoUsers.find(u => u.role === role);
-    if (user) {
-      this.loginForm.patchValue({
-        username: user.username,
-        password: 'password'
-      });
-    }
-  }
 }

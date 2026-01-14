@@ -45,15 +45,6 @@
           </button>
         </div>
 
-        <div class="demo-credentials" *ngIf="!isLoading && !isRegisterMode">
-          <mat-divider></mat-divider>
-          <p class="demo-title">Credenciales de demostración:</p>
-          <div class="demo-users">
-            <div class="demo-user" *ngFor="let user of demoUsers">
-              <strong>{{ user.role | titlecase }}:</strong> {{ user.username }} / password
-            </div>
-          </div>
-        </div>
       </form>
     </mat-card-content>
   </mat-card>

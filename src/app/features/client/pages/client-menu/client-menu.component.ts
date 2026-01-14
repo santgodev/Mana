@@ -1,6 +1,6 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
@@ -9,6 +9,7 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 
 import { ProductService, ClientCartService } from '../../../../core/services';
 import { Product, Category } from '../../../../models/supabase.types';
+import { TranslatePipe } from '../../../../core/pipes/translate.pipe';
 
 // Inline Child Component
 @Component({
@@ -27,7 +28,7 @@ import { Product, Category } from '../../../../models/supabase.types';
       <div class="card-content">
         <div class="header">
           <h3 class="title">{{ product.name }}</h3>
-          <span class="price">\${{ product.price | number:'1.0-0' }}</span>
+          <span class="price">$\{{ product.price | number:'1.0-0' }}</span>
         </div>
         <p class="desc">{{ product.description }}</p>
       </div>
@@ -68,8 +69,8 @@ import { Product, Category } from '../../../../models/supabase.types';
       width: 44px;
       height: 44px;
       border-radius: 50%;
-      background: #2C1810; /* Coffee Dark */
-      color: #D4AF37; /* Gold */
+      background: #2C1810;
+      color: #D4AF37;
       border: none;
       display: flex;
       align-items: center;
@@ -135,11 +136,7 @@ export class ProductCardComponent {
 
   getProductImage(): string {
     if (this.product.image_url) return this.product.image_url;
-
-    // Placeholder logic based on keywords
     const name = this.product.name.toLowerCase();
-
-    // Curated high-quality Unsplash images
     const images: Record<string, string> = {
       coffee: 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=500&q=80',
       latte: 'https://images.unsplash.com/photo-1572442388796-11668a67e53d?w=500&q=80',
@@ -152,7 +149,6 @@ export class ProductCardComponent {
       sandwich: 'https://images.unsplash.com/photo-1528735602780-2552fd46c7af?w=500&q=80',
       default: 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=500&q=80'
     };
-
     if (name.includes('latte') || name.includes('leche')) return images['latte'];
     if (name.includes('capu') || name.includes('ccino')) return images['cappuccino'];
     if (name.includes('espresso') || name.includes('cafe') || name.includes('tinto')) return images['espresso'];
@@ -160,12 +156,9 @@ export class ProductCardComponent {
     if (name.includes('torta') || name.includes('pastel') || name.includes('cake')) return images['cake'];
     if (name.includes('croissant') || name.includes('pan')) return images['croissant'];
     if (name.includes('sandwich') || name.includes('bocadillo')) return images['sandwich'];
-
     return images['default'];
   }
 }
-
-import { TranslatePipe } from '../../../../core/pipes/translate.pipe';
 
 // Main Component
 @Component({
@@ -215,70 +208,30 @@ import { TranslatePipe } from '../../../../core/pipes/translate.pipe';
           </div>
         </mat-tab>
       </mat-tab-group>
+      
+      <button class="floating-cart-btn" *ngIf="cartItemsCount > 0" (click)="goToCart()">
+        <div class="cart-badge">{{ cartItemsCount }}</div>
+        <mat-icon>shopping_cart</mat-icon>
+        <span>Ver Carrito</span>
+      </button>
     </div>
   `,
   styles: [`
-    .menu-container { 
-        padding: 20px 16px; 
-        background: #faf9f6; /* Off-white premium bg */
-        min-height: 100vh;
-    }
-    
-    .welcome-header {
-      margin-bottom: 24px;
-      text-align: center;
-    }
-    .welcome-header h1 {
-      font-family: 'Outfit', sans-serif;
-      font-size: 2rem;
-      font-weight: 800;
-      color: #2C1810;
-      margin: 0;
-    }
-    .welcome-header p {
-      color: #8c8c8c;
-      margin: 4px 0 0;
-    }
-
-    .product-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-      gap: 20px;
-      padding-top: 20px;
-      padding-bottom: 100px;
-    }
-
-    /* Customizing Mat Tabs to look less Material */
-    ::ng-deep .custom-tabs .mat-mdc-tab-header {
-      border-bottom: none;
-    }
-    ::ng-deep .custom-tabs .mat-mdc-tab {
-        font-family: 'Outfit', sans-serif;
-        font-weight: 600;
-        letter-spacing: 0.5px;
-        color: #8c8c8c;
-    }
-    ::ng-deep .custom-tabs .mat-mdc-tab.mdc-tab--active .mdc-tab__text-label {
-        color: #2C1810 !important;
-    }
-    ::ng-deep .custom-tabs .mat-mdc-tab-indicator__content {
-        border-color: #D4AF37 !important; /* Gold underline */
-    }
-
-    .loading-shade {
-      display: flex;
-      justify-content: center;
-      padding: 50px;
-    }
-    .spinner {
-      width: 40px; 
-      height: 40px;
-      border: 4px solid #eee;
-      border-top-color: #D4AF37;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-    }
+    .menu-container { padding: 20px 16px; background: #faf9f6; min-height: 100vh; }
+    .welcome-header { margin-bottom: 24px; text-align: center; }
+    .welcome-header h1 { font-family: 'Outfit', sans-serif; font-size: 2rem; font-weight: 800; color: #2C1810; margin: 0; }
+    .welcome-header p { color: #8c8c8c; margin: 4px 0 0; }
+    .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 20px; padding-top: 20px; padding-bottom: 100px; }
+    ::ng-deep .custom-tabs .mat-mdc-tab-header { border-bottom: none; }
+    ::ng-deep .custom-tabs .mat-mdc-tab { font-family: 'Outfit', sans-serif; font-weight: 600; letter-spacing: 0.5px; color: #8c8c8c; }
+    ::ng-deep .custom-tabs .mat-mdc-tab.mdc-tab--active .mdc-tab__text-label { color: #2C1810 !important; }
+    ::ng-deep .custom-tabs .mat-mdc-tab-indicator__content { border-color: #D4AF37 !important; }
+    .loading-shade { display: flex; justify-content: center; padding: 50px; }
+    .spinner { width: 40px; height: 40px; border: 4px solid #eee; border-top-color: #D4AF37; border-radius: 50%; animation: spin 1s linear infinite; }
     @keyframes spin { 100% { transform: rotate(360deg); } }
+    .floating-cart-btn { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: #2C1810; color: #D4AF37; border: none; padding: 12px 24px; border-radius: 30px; display: flex; align-items: center; gap: 12px; font-family: 'Outfit', sans-serif; font-weight: 700; box-shadow: 0 10px 25px rgba(0,0,0,0.2); z-index: 1000; cursor: pointer; transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+    .floating-cart-btn:active { transform: translateX(-50%) scale(0.95); }
+    .cart-badge { background: #D4AF37; color: #2C1810; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; }
   `]
 })
 export class ClientMenuComponent implements OnInit {
@@ -286,8 +239,10 @@ export class ClientMenuComponent implements OnInit {
   categories: Category[] = [];
   isLoading = true;
   tableId: string | null = null;
+  cartItemsCount = 0;
 
   constructor(
+    private router: Router,
     private route: ActivatedRoute,
     private productService: ProductService,
     private cartService: ClientCartService,
@@ -299,16 +254,23 @@ export class ClientMenuComponent implements OnInit {
     if (this.tableId) {
       this.cartService.setTableId(this.tableId);
     }
+    this.cartService.cart$.subscribe(items => {
+      this.cartItemsCount = items.reduce((acc, item) => acc + item.quantity, 0);
+    });
     this.loadData();
   }
 
   async loadData() {
     try {
       this.productService.categories$.subscribe((cats: Category[]) => this.categories = cats);
-
       await this.productService.loadProducts();
       this.productService.products$.subscribe((prods: Product[]) => {
-        this.products = prods.filter(p => p.is_available);
+        // PERMISSIVE FILTER: handles isAvailable or Stock nulls
+        this.products = prods.filter(p =>
+          p.is_available !== false &&
+          (p.stock === null || p.stock === undefined || p.stock > 0)
+        );
+        console.log(`[ClientMenu] Displayed ${this.products.length} of ${prods.length} products`);
         this.isLoading = false;
       });
     } catch (error) {
@@ -323,17 +285,15 @@ export class ClientMenuComponent implements OnInit {
 
   addToCart(product: Product) {
     this.cartService.addToCart(product);
-    const snackBarRef = this.snackBar.open(`${product.name} agregado`, 'Ver carrito', { duration: 2000 });
+    const snackBarRef = this.snackBar.open(`${product.name} agregado`, 'Ver carrito', { duration: 3000 });
+    snackBarRef.onAction().subscribe(() => { this.goToCart(); });
+  }
 
-    snackBarRef.onAction().subscribe(() => {
-      if (this.tableId) {
-        // Navigate via router, injecting it if needed. 
-        // Wait, this component doesn't have Router injected? Let's check constructor.
-        // It has 'route', but not 'router'. Access via window or better inject Router.
-        // Since I cannot change constructor easily without replacement, I'll rely on the Floating Button.
-        // OR I can use window.location as fallback but that's ugly.
-        // Let's assume the user uses the floating button for now as I missed injecting Router here.
-      }
-    });
+  goToCart() {
+    if (this.tableId) {
+      this.router.navigate(['/client/cart', this.tableId]);
+    } else {
+      this.snackBar.open('Error: Mesa no identificada', 'Cerrar');
+    }
   }
 }

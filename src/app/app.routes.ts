@@ -9,11 +9,13 @@ export const routes: Routes = [
 
   {
     path: 'kitchen',
+    canActivate: [AuthGuard, RoleGuard],
+    data: { roles: ['admin', 'waiter'] },
     loadComponent: () => import('./features/kitchen/components/kitchen-board/kitchen-board.component').then(m => m.KitchenBoardComponent)
-    // Security disabled for dev
   },
   {
     path: '',
+    canActivate: [AuthGuard],
     loadChildren: () => import('./layouts/main-layout/main-layout.module').then(m => m.MainLayoutModule)
   },
   {
