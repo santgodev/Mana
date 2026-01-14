@@ -45,48 +45,85 @@ export class ReportsComponent implements OnInit {
       this.stats = await this.reportService.getMonthlyStats();
     } catch (error) {
       console.error('Error loading reports:', error);
-      this.snackBar.open('Error al cargar reportes', 'Cerrar', { duration: 3000 });
+      this.snackBar.open('Error al cargar reportes', 'Cerrar', { duration: 5000 });
     } finally {
       this.isLoading = false;
     }
   }
 
+  getMaxHourCount(): number {
+    if (!this.stats?.peakHours) return 1;
+    return Math.max(...this.stats.peakHours.map(h => h.count), 1);
+  }
+
   async exportToPDF() {
-    const data = document.getElementById('report-dashboard');
-    if (!data) return;
+    if (!this.stats) return;
 
     this.isLoading = true;
+    let watermark: HTMLElement | null = null; // Declare watermark here to be accessible in finally
     try {
-      const canvas = await html2canvas(data, {
+      const dashboard = document.getElementById('report-dashboard');
+      if (!dashboard) return;
+
+      // Temporarily show watermark for PDF
+      watermark = document.querySelector('.watermark') as HTMLElement;
+      if (watermark) watermark.style.display = 'block';
+
+      const canvas = await html2canvas(dashboard, {
         scale: 2,
         useCORS: true,
         logging: false,
-        backgroundColor: '#f8f9fa'
+        backgroundColor: '#ffffff'
       });
 
-      const imgWidth = 208;
-      const pageHeight = 295;
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF('p', 'mm', 'a4');
+
+      const imgWidth = 210; // A4 width in mm
+      const pageHeight = 297; // A4 height in mm
       const imgHeight = (canvas.height * imgWidth) / canvas.width;
       let heightLeft = imgHeight;
-
-      const pdf = new jsPDF('p', 'mm', 'a4');
       let position = 0;
 
-      pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, position, imgWidth, imgHeight);
+      // Add header
+      pdf.setFontSize(20);
+      pdf.setTextColor(139, 69, 19); // Coffee brown
+      pdf.text('Maná - Reporte Ejecutivo', 105, 15, { align: 'center' });
+
+      pdf.setFontSize(10);
+      pdf.setTextColor(100);
+      pdf.text(new Date().toLocaleDateString('es-CO', { year: 'numeric', month: 'long' }), 105, 22, { align: 'center' });
+
+      // Add first page
+      pdf.addImage(imgData, 'PNG', 0, 30, imgWidth, imgHeight);
       heightLeft -= pageHeight;
 
+      // Add additional pages if needed
       while (heightLeft >= 0) {
         position = heightLeft - imgHeight;
         pdf.addPage();
-        pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, position, imgWidth, imgHeight);
+        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
         heightLeft -= pageHeight;
       }
 
-      pdf.save(`Reporte_Mana_${this.currentDate.getMonth() + 1}_${this.currentDate.getFullYear()}.pdf`);
+      // Add footer to all pages
+      const pageCount = pdf.getNumberOfPages();
+      for (let i = 1; i <= pageCount; i++) {
+        pdf.setPage(i);
+        pdf.setFontSize(8);
+        pdf.setTextColor(150);
+        pdf.text(`Página ${i} de ${pageCount}`, 105, 290, { align: 'center' });
+        pdf.text(`Generado: ${new Date().toLocaleString('es-CO')}`, 105, 294, { align: 'center' });
+      }
+
+      // Reset watermark
+      if (watermark) watermark.style.display = '';
+
+      pdf.save(`Reporte-Mana-${new Date().toISOString().split('T')[0]}.pdf`);
       this.snackBar.open('PDF generado con éxito', 'OK', { duration: 3000 });
     } catch (error) {
       console.error('Error generating PDF:', error);
-      this.snackBar.open('Error al generar PDF', 'Cerrar', { duration: 3000 });
+      this.snackBar.open('Error al generar PDF', 'Cerrar', { duration: 5000 });
     } finally {
       this.isLoading = false;
     }

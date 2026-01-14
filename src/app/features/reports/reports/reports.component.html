@@ -1,11 +1,13 @@
 <div class="reports-container">
   <div class="page-header" id="report-header">
     <div class="header-content">
-      <h1 class="page-title">
-        <mat-icon>assessment</mat-icon>
-        Reportes y Análisis
-      </h1>
-      <p class="subtitle">Resumen de rendimiento - {{ currentDate | date:'MMMM yyyy' }}</p>
+      <div class="brand-header">
+        <div class="brand-icon">🍽️</div>
+        <div>
+          <h1 class="page-title">Maná - Reportes Ejecutivos</h1>
+          <p class="subtitle">{{ currentDate | date:'MMMM yyyy' | titlecase }}</p>
+        </div>
+      </div>
     </div>
     <div class="header-actions">
       <button mat-flat-button color="primary" (click)="loadStats()" [disabled]="isLoading">
@@ -21,88 +23,182 @@
 
   <div *ngIf="isLoading" class="loading-overlay">
     <mat-icon class="spinner">hourglass_empty</mat-icon>
-    <p>Calculando analíticas...</p>
+    <p>Generando analíticas...</p>
   </div>
 
   <div *ngIf="!isLoading && stats" class="dashboard-grid" id="report-dashboard">
-    <!-- Main KPI Grid -->
-    <div class="kpi-grid">
-      <mat-card class="kpi-card sales">
+
+    <!-- Financial Summary Section -->
+    <section class="section-header">
+      <mat-icon>account_balance</mat-icon>
+      <h2>Resumen Financiero</h2>
+    </section>
+
+    <div class="financial-grid">
+      <mat-card class="metric-card income">
         <mat-card-content>
-          <div class="kpi-icon">
+          <div class="metric-icon">
+            <mat-icon>trending_up</mat-icon>
+          </div>
+          <div class="metric-data">
+            <span class="label">Ingresos Totales</span>
+            <h2 class="value">{{ stats.totalIncome | currency:'CAD':'symbol-narrow':'1.0-0' }}</h2>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="metric-card expense">
+        <mat-card-content>
+          <div class="metric-icon">
+            <mat-icon>trending_down</mat-icon>
+          </div>
+          <div class="metric-data">
+            <span class="label">Egresos Totales</span>
+            <h2 class="value">{{ stats.totalExpenses | currency:'CAD':'symbol-narrow':'1.0-0' }}</h2>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="metric-card profit">
+        <mat-card-content>
+          <div class="metric-icon">
+            <mat-icon>savings</mat-icon>
+          </div>
+          <div class="metric-data">
+            <span class="label">Utilidad Neta</span>
+            <h2 class="value" [class.negative]="stats.netProfit < 0">
+              {{ stats.netProfit | currency:'CAD':'symbol-narrow':'1.0-0' }}
+            </h2>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="metric-card margin">
+        <mat-card-content>
+          <div class="metric-icon">
+            <mat-icon>percent</mat-icon>
+          </div>
+          <div class="metric-data">
+            <span class="label">Margen de Utilidad</span>
+            <h2 class="value" [class.negative]="stats.profitMargin < 0">
+              {{ stats.profitMargin | number:'1.1-1' }}%
+            </h2>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <!-- Sales Metrics Section -->
+    <section class="section-header">
+      <mat-icon>shopping_cart</mat-icon>
+      <h2>Métricas de Ventas</h2>
+    </section>
+
+    <div class="sales-grid">
+      <mat-card class="metric-card sales">
+        <mat-card-content>
+          <div class="metric-icon">
             <mat-icon>payments</mat-icon>
           </div>
-          <div class="kpi-data">
-            <span class="label">Ventas Totales</span>
+          <div class="metric-data">
+            <span class="label">Ventas</span>
             <h2 class="value">{{ stats.totalSales | currency:'CAD':'symbol-narrow':'1.0-0' }}</h2>
+            <span class="sub-label">{{ stats.orderCount }} pedidos</span>
           </div>
         </mat-card-content>
       </mat-card>
 
-      <mat-card class="kpi-card orders">
+      <mat-card class="metric-card ticket">
         <mat-card-content>
-          <div class="kpi-icon">
-            <mat-icon>shopping_bag</mat-icon>
-          </div>
-          <div class="kpi-data">
-            <span class="label">Pedidos Totales</span>
-            <h2 class="value">{{ stats.orderCount }}</h2>
-          </div>
-        </mat-card-content>
-      </mat-card>
-
-      <mat-card class="kpi-card ticket">
-        <mat-card-content>
-          <div class="kpi-icon">
+          <div class="metric-icon">
             <mat-icon>receipt_long</mat-icon>
           </div>
-          <div class="kpi-data">
+          <div class="metric-data">
             <span class="label">Ticket Promedio</span>
             <h2 class="value">{{ stats.averageTicket | currency:'CAD':'symbol-narrow':'1.0-0' }}</h2>
           </div>
         </mat-card-content>
       </mat-card>
+
+      <mat-card class="metric-card items">
+        <mat-card-content>
+          <div class="metric-icon">
+            <mat-icon>inventory_2</mat-icon>
+          </div>
+          <div class="metric-data">
+            <span class="label">Items Vendidos</span>
+            <h2 class="value">{{ stats.itemsSold }}</h2>
+            <span class="sub-label">{{ stats.avgItemsPerOrder | number:'1.1-1' }} por pedido</span>
+          </div>
+        </mat-card-content>
+      </mat-card>
     </div>
 
-    <!-- Efficiency & Productivity Grid -->
-    <div class="efficiency-grid">
-      <mat-card class="efficiency-card attention">
+    <!-- Operational Metrics Section -->
+    <section class="section-header">
+      <mat-icon>analytics</mat-icon>
+      <h2>Métricas Operacionales</h2>
+    </section>
+
+    <div class="operational-grid">
+      <mat-card class="metric-card customers">
         <mat-card-content>
-          <div class="eff-header">
+          <div class="metric-icon">
+            <mat-icon>people</mat-icon>
+          </div>
+          <div class="metric-data">
+            <span class="label">Clientes Atendidos</span>
+            <h2 class="value">{{ stats.customerCount }}</h2>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="metric-card turnover">
+        <mat-card-content>
+          <div class="metric-icon">
+            <mat-icon>table_restaurant</mat-icon>
+          </div>
+          <div class="metric-data">
+            <span class="label">Rotación de Mesas</span>
+            <h2 class="value">{{ stats.tableTurnoverRate | number:'1.1-1' }}</h2>
+            <span class="sub-label">sesiones por mesa</span>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="metric-card attention">
+        <mat-card-content>
+          <div class="metric-icon">
             <mat-icon>timer</mat-icon>
-            <span class="eff-label">Atención Promedio</span>
           </div>
-          <div class="eff-value">
-            {{ stats.avgAttentionTime | number:'1.1-1' }} <span class="unit">min</span>
+          <div class="metric-data">
+            <span class="label">Tiempo de Atención</span>
+            <h2 class="value">{{ stats.avgAttentionTime | number:'1.0-0' }} min</h2>
           </div>
-          <mat-progress-bar mode="determinate" [value]="(stats.avgAttentionTime / 60) * 100"></mat-progress-bar>
-          <p class="eff-hint">Tiempo desde apertura hasta pago</p>
         </mat-card-content>
       </mat-card>
 
-      <mat-card class="efficiency-card prep">
+      <mat-card class="metric-card prep">
         <mat-card-content>
-          <div class="eff-header">
+          <div class="metric-icon">
             <mat-icon>restaurant</mat-icon>
-            <span class="eff-label">Preparación Cocina</span>
           </div>
-          <div class="eff-value">
-            {{ stats.avgPrepTime | number:'1.1-1' }} <span class="unit">min</span>
+          <div class="metric-data">
+            <span class="label">Tiempo de Cocina</span>
+            <h2 class="value">{{ stats.avgPrepTime | number:'1.0-0' }} min</h2>
           </div>
-          <mat-progress-bar mode="determinate" [value]="(stats.avgPrepTime / 30) * 100"
-            color="accent"></mat-progress-bar>
-          <p class="eff-hint">Promedio en pedidos finalizados</p>
         </mat-card-content>
       </mat-card>
     </div>
 
-    <div class="main-stats-container">
-      <!-- Top Products Section -->
-      <mat-card class="table-card top-products">
+    <!-- Analytics Section -->
+    <div class="analytics-container">
+      <!-- Top Products -->
+      <mat-card class="analytics-card top-products">
         <mat-card-header>
           <mat-card-title>
             <mat-icon>trending_up</mat-icon>
-            Top 5 Productos más Vendidos
+            Top 5 Productos
           </mat-card-title>
         </mat-card-header>
         <mat-card-content>
@@ -123,31 +219,34 @@
           </div>
           <div *ngIf="stats.topProducts.length === 0" class="empty-state">
             <mat-icon>query_stats</mat-icon>
-            <p>No hay datos de ventas para este mes todavía.</p>
+            <p>No hay datos de ventas este mes.</p>
           </div>
         </mat-card-content>
       </mat-card>
 
-      <!-- Peak Hours Heatmap -->
-      <mat-card class="table-card peak-hours">
+      <!-- Peak Hours -->
+      <mat-card class="analytics-card peak-hours">
         <mat-card-header>
           <mat-card-title>
             <mat-icon>schedule</mat-icon>
-            Distribución de Pedidos por Hora
+            Horas Pico
           </mat-card-title>
         </mat-card-header>
         <mat-card-content>
           <div class="heatmap-container">
             <div *ngFor="let hour of stats.peakHours" class="hour-bar-wrapper">
-              <div class="hour-bar" [style.height.%]="(hour.count / 10) * 100"
+              <div class="hour-bar" [style.height.%]="(hour.count / getMaxHourCount()) * 100"
                 [matTooltip]="hour.count + ' pedidos a las ' + hour.hour + ':00'">
-                <div class="bar-fill" [style.opacity]="hour.count > 0 ? 0.3 + (hour.count / 10) : 0.1"></div>
+                <div class="bar-fill"></div>
               </div>
-              <span class="hour-label" *ngIf="hour.hour % 4 === 0">{{ hour.hour }}:00</span>
+              <span class="hour-label" *ngIf="hour.hour % 4 === 0">{{ hour.hour }}h</span>
             </div>
           </div>
         </mat-card-content>
       </mat-card>
     </div>
   </div>
+
+  <!-- Watermark for PDF -->
+  <div class="watermark">Maná</div>
 </div>

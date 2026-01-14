@@ -4,12 +4,29 @@ import { from, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 export interface MonthlyStats {
+    // Financial Metrics
+    totalIncome: number;
+    totalExpenses: number;
+    netProfit: number;
+    profitMargin: number;
+
+    // Sales Metrics
     totalSales: number;
     orderCount: number;
     averageTicket: number;
-    topProducts: TopProduct[];
+
+    // Operational Metrics
+    customerCount: number;
+    itemsSold: number;
+    avgItemsPerOrder: number;
+    tableTurnoverRate: number;
+
+    // Efficiency Metrics
     avgAttentionTime: number; // in minutes
     avgPrepTime: number; // in minutes
+
+    // Analytics
+    topProducts: TopProduct[];
     peakHours: { hour: number, count: number }[];
 }
 
@@ -56,18 +73,39 @@ export class ReportService {
 
         if (ordersError) throw ordersError;
 
-        // 2. Fetch completed table sessions for attention time
+        // 2. Fetch completed table sessions for attention time and customer count
         const { data: sessions, error: sessionsError } = await this.supabase.client
             .from('table_sessions')
-            .select('start_time, end_time')
+            .select('start_time, end_time, client_count')
             .eq('status', 'closed')
             .gte('end_time', startOfMonth)
             .lte('end_time', endOfMonth);
 
         if (sessionsError) throw sessionsError;
 
+        // 3. Fetch expenses from cash transactions
+        const { data: expenses, error: expensesError } = await this.supabase.client
+            .from('cash_transactions')
+            .select('amount')
+            .eq('type', 'expense')
+            .gte('created_at', startOfMonth)
+            .lte('created_at', endOfMonth);
+
+        if (expensesError) throw expensesError;
+
+        // 4. Count unique tables used (for turnover rate)
+        const { data: tablesUsed, error: tablesError } = await this.supabase.client
+            .from('table_sessions')
+            .select('table_id')
+            .eq('status', 'closed')
+            .gte('end_time', startOfMonth)
+            .lte('end_time', endOfMonth);
+
+        if (tablesError) throw tablesError;
+
         let totalSales = 0;
         let orderCount = orders?.length || 0;
+        let itemsSold = 0;
         const productMap = new Map<string, { quantity: number, revenue: number }>();
         const hourMap = new Map<number, number>();
         let totalPrepTimeMs = 0;
@@ -78,6 +116,7 @@ export class ReportService {
             items.forEach(item => {
                 const subtotal = item.quantity * item.unit_price;
                 totalSales += subtotal;
+                itemsSold += item.quantity;
 
                 const productName = item.product?.name || 'Producto Desconocido';
                 const current = productMap.get(productName) || { quantity: 0, revenue: 0 };
@@ -112,6 +151,12 @@ export class ReportService {
             hourMap.set(hour, (hourMap.get(hour) || 0) + 1);
         });
 
+        // Calculate expenses
+        const totalExpenses = expenses?.reduce((sum, exp) => sum + exp.amount, 0) || 0;
+
+        // Calculate customer count
+        const customerCount = sessions?.reduce((sum, session) => sum + (session.client_count || 0), 0) || 0;
+
         // Attention time calculation
         let totalAttentionTimeMs = 0;
         let attentionCount = 0;
@@ -127,6 +172,10 @@ export class ReportService {
             }
         });
 
+        // Table turnover rate
+        const uniqueTables = new Set(tablesUsed?.map(t => t.table_id) || []);
+        const tableTurnoverRate = uniqueTables.size > 0 ? (sessions?.length || 0) / uniqueTables.size : 0;
+
         const topProducts: TopProduct[] = Array.from(productMap.entries())
             .map(([name, data]) => ({
                 name,
@@ -141,13 +190,35 @@ export class ReportService {
             count: hourMap.get(i) || 0
         }));
 
+        // Financial calculations
+        const totalIncome = totalSales;
+        const netProfit = totalIncome - totalExpenses;
+        const profitMargin = totalIncome > 0 ? (netProfit / totalIncome) * 100 : 0;
+
         return {
+            // Financial
+            totalIncome,
+            totalExpenses,
+            netProfit,
+            profitMargin,
+
+            // Sales
             totalSales,
             orderCount,
             averageTicket: orderCount > 0 ? totalSales / orderCount : 0,
-            topProducts,
+
+            // Operational
+            customerCount,
+            itemsSold,
+            avgItemsPerOrder: orderCount > 0 ? itemsSold / orderCount : 0,
+            tableTurnoverRate,
+
+            // Efficiency
             avgAttentionTime: attentionCount > 0 ? (totalAttentionTimeMs / attentionCount) / (1000 * 60) : 0,
             avgPrepTime: prepCount > 0 ? (totalPrepTimeMs / prepCount) / (1000 * 60) : 0,
+
+            // Analytics
+            topProducts,
             peakHours
         };
     }
