@@ -34,6 +34,11 @@
     margin: 4px 0 0 0;
     font-size: 1rem;
   }
+
+  .header-actions {
+    display: flex;
+    gap: 12px;
+  }
 }
 
 // Loading State
@@ -64,12 +69,18 @@
   }
 }
 
+// Dashboards
+.dashboard-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
 // KPI Grid
 .kpi-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 24px;
-  margin-bottom: 32px;
 }
 
 .kpi-card {
@@ -139,9 +150,76 @@
   }
 }
 
-// Sections
-.section-container {
-  margin-bottom: 32px;
+// Efficiency Grid
+.efficiency-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 24px;
+}
+
+.efficiency-card {
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03) !important;
+  border-left: 5px solid #D4AF37;
+
+  ::ng-deep .mat-mdc-card-content {
+    padding: 24px !important;
+  }
+
+  .eff-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #6c757d;
+    margin-bottom: 12px;
+
+    mat-icon {
+      font-size: 1.2rem;
+      width: 1.2rem;
+      height: 1.2rem;
+    }
+
+    .eff-label {
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
+  }
+
+  .eff-value {
+    font-size: 2.2rem;
+    font-weight: 800;
+    color: #2c3e50;
+    margin-bottom: 8px;
+
+    .unit {
+      font-size: 1rem;
+      color: #888;
+      font-weight: 400;
+    }
+  }
+
+  mat-progress-bar {
+    height: 6px;
+    border-radius: 3px;
+    margin-bottom: 12px;
+  }
+
+  .eff-hint {
+    font-size: 0.8rem;
+    color: #999;
+    margin: 0;
+  }
+}
+
+// Main Stats (Products + Peak Hours)
+.main-stats-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+
+  @media (max-width: 1100px) {
+    grid-template-columns: 1fr;
+  }
 }
 
 .table-card {
@@ -171,10 +249,6 @@
 }
 
 // Top Products List
-.top-products-list {
-  padding: 8px 0;
-}
-
 .product-item {
   display: grid;
   grid-template-columns: 40px 1fr 100px;
@@ -243,17 +317,52 @@
   }
 }
 
-.empty-state {
-  text-align: center;
-  padding: 48px;
-  color: #888;
+// Heatmap
+.heatmap-container {
+  height: 300px;
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+  padding: 24px;
+  background: #fff;
+}
 
-  mat-icon {
-    font-size: 4rem;
-    width: 4rem;
-    height: 4rem;
-    margin-bottom: 16px;
-    opacity: 0.3;
+.hour-bar-wrapper {
+  flex: 1;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 8px;
+
+  .hour-bar {
+    width: 100%;
+    background: #f0f4f8;
+    border-radius: 4px;
+    position: relative;
+    cursor: pointer;
+
+    &:hover .bar-fill {
+      background: #D4AF37;
+      opacity: 1 !important;
+    }
+
+    .bar-fill {
+      position: absolute;
+      bottom: 0;
+      width: 100%;
+      height: 100%;
+      background: #D4AF37;
+      border-radius: 4px;
+      transition: all 0.3s ease;
+    }
+  }
+
+  .hour-label {
+    font-size: 0.7rem;
+    color: #aaa;
+    font-weight: 600;
   }
 }
 
@@ -263,8 +372,21 @@
     align-items: flex-start;
     gap: 16px;
 
-    button {
+    .header-actions {
       width: 100%;
+      flex-direction: column;
     }
+  }
+}
+
+// PDF Export special rules
+@media print {
+  .reports-container {
+    padding: 0;
+    background: white;
+  }
+
+  .header-actions {
+    display: none;
   }
 }

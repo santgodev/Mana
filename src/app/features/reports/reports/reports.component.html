@@ -1,5 +1,5 @@
 <div class="reports-container">
-  <div class="page-header">
+  <div class="page-header" id="report-header">
     <div class="header-content">
       <h1 class="page-title">
         <mat-icon>assessment</mat-icon>
@@ -7,10 +7,16 @@
       </h1>
       <p class="subtitle">Resumen de rendimiento - {{ currentDate | date:'MMMM yyyy' }}</p>
     </div>
-    <button mat-flat-button color="primary" (click)="loadStats()" [disabled]="isLoading">
-      <mat-icon>{{ isLoading ? 'hourglass_empty' : 'refresh' }}</mat-icon>
-      Actualizar
-    </button>
+    <div class="header-actions">
+      <button mat-flat-button color="primary" (click)="loadStats()" [disabled]="isLoading">
+        <mat-icon>{{ isLoading ? 'hourglass_empty' : 'refresh' }}</mat-icon>
+        Actualizar
+      </button>
+      <button mat-stroked-button color="accent" (click)="exportToPDF()" [disabled]="isLoading || !stats">
+        <mat-icon>picture_as_pdf</mat-icon>
+        Exportar PDF
+      </button>
+    </div>
   </div>
 
   <div *ngIf="isLoading" class="loading-overlay">
@@ -18,8 +24,8 @@
     <p>Calculando analíticas...</p>
   </div>
 
-  <div *ngIf="!isLoading && stats" class="dashboard-grid">
-    <!-- KPI Cards -->
+  <div *ngIf="!isLoading && stats" class="dashboard-grid" id="report-dashboard">
+    <!-- Main KPI Grid -->
     <div class="kpi-grid">
       <mat-card class="kpi-card sales">
         <mat-card-content>
@@ -58,9 +64,41 @@
       </mat-card>
     </div>
 
-    <!-- Top Products Section -->
-    <div class="section-container">
-      <mat-card class="table-card">
+    <!-- Efficiency & Productivity Grid -->
+    <div class="efficiency-grid">
+      <mat-card class="efficiency-card attention">
+        <mat-card-content>
+          <div class="eff-header">
+            <mat-icon>timer</mat-icon>
+            <span class="eff-label">Atención Promedio</span>
+          </div>
+          <div class="eff-value">
+            {{ stats.avgAttentionTime | number:'1.1-1' }} <span class="unit">min</span>
+          </div>
+          <mat-progress-bar mode="determinate" [value]="(stats.avgAttentionTime / 60) * 100"></mat-progress-bar>
+          <p class="eff-hint">Tiempo desde apertura hasta pago</p>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="efficiency-card prep">
+        <mat-card-content>
+          <div class="eff-header">
+            <mat-icon>restaurant</mat-icon>
+            <span class="eff-label">Preparación Cocina</span>
+          </div>
+          <div class="eff-value">
+            {{ stats.avgPrepTime | number:'1.1-1' }} <span class="unit">min</span>
+          </div>
+          <mat-progress-bar mode="determinate" [value]="(stats.avgPrepTime / 30) * 100"
+            color="accent"></mat-progress-bar>
+          <p class="eff-hint">Promedio en pedidos finalizados</p>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <div class="main-stats-container">
+      <!-- Top Products Section -->
+      <mat-card class="table-card top-products">
         <mat-card-header>
           <mat-card-title>
             <mat-icon>trending_up</mat-icon>
@@ -83,10 +121,30 @@
               </div>
             </div>
           </div>
-
           <div *ngIf="stats.topProducts.length === 0" class="empty-state">
             <mat-icon>query_stats</mat-icon>
             <p>No hay datos de ventas para este mes todavía.</p>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Peak Hours Heatmap -->
+      <mat-card class="table-card peak-hours">
+        <mat-card-header>
+          <mat-card-title>
+            <mat-icon>schedule</mat-icon>
+            Distribución de Pedidos por Hora
+          </mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="heatmap-container">
+            <div *ngFor="let hour of stats.peakHours" class="hour-bar-wrapper">
+              <div class="hour-bar" [style.height.%]="(hour.count / 10) * 100"
+                [matTooltip]="hour.count + ' pedidos a las ' + hour.hour + ':00'">
+                <div class="bar-fill" [style.opacity]="hour.count > 0 ? 0.3 + (hour.count / 10) : 0.1"></div>
+              </div>
+              <span class="hour-label" *ngIf="hour.hour % 4 === 0">{{ hour.hour }}:00</span>
+            </div>
           </div>
         </mat-card-content>
       </mat-card>

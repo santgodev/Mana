@@ -8,6 +8,9 @@ export interface MonthlyStats {
     orderCount: number;
     averageTicket: number;
     topProducts: TopProduct[];
+    avgAttentionTime: number; // in minutes
+    avgPrepTime: number; // in minutes
+    peakHours: { hour: number, count: number }[];
 }
 
 export interface TopProduct {
@@ -28,16 +31,22 @@ export class ReportService {
         const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
         const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59).toISOString();
 
-        // 1. Fetch all paid orders for the month
+        // 1. Fetch all paid orders for the month with kitchen item timestamps
         const { data: orders, error: ordersError } = await this.supabase.client
             .from('orders')
             .select(`
                 id,
                 status,
                 updated_at,
+                created_at,
+                kitchen_started_at,
+                kitchen_finished_at,
                 order_items (
                     quantity,
                     unit_price,
+                    started_at,
+                    finished_at,
+                    created_at,
                     product:products ( name )
                 )
             `)
@@ -47,9 +56,22 @@ export class ReportService {
 
         if (ordersError) throw ordersError;
 
+        // 2. Fetch completed table sessions for attention time
+        const { data: sessions, error: sessionsError } = await this.supabase.client
+            .from('table_sessions')
+            .select('start_time, end_time')
+            .eq('status', 'closed')
+            .gte('end_time', startOfMonth)
+            .lte('end_time', endOfMonth);
+
+        if (sessionsError) throw sessionsError;
+
         let totalSales = 0;
         let orderCount = orders?.length || 0;
         const productMap = new Map<string, { quantity: number, revenue: number }>();
+        const hourMap = new Map<number, number>();
+        let totalPrepTimeMs = 0;
+        let prepCount = 0;
 
         orders?.forEach(order => {
             const items = (order.order_items as any[]) || [];
@@ -63,7 +85,46 @@ export class ReportService {
                     quantity: current.quantity + item.quantity,
                     revenue: current.revenue + subtotal
                 });
+
+                // Item Preparation time calculation
+                // Priority: item.finished_at - (item.started_at || item.created_at || order.created_at)
+                if (item.finished_at) {
+                    const end = new Date(item.finished_at).getTime();
+                    const start = new Date(item.started_at || item.created_at || order.created_at).getTime();
+                    const duration = end - start;
+                    if (duration > 0) {
+                        totalPrepTimeMs += duration;
+                        prepCount++;
+                    }
+                }
             });
+
+            // Fallback to order-level timestamps if no items had finished_at
+            if (prepCount === 0 && order.kitchen_started_at && order.kitchen_finished_at) {
+                const start = new Date(order.kitchen_started_at).getTime();
+                const end = new Date(order.kitchen_finished_at).getTime();
+                totalPrepTimeMs += (end - start);
+                prepCount++;
+            }
+
+            // Peak hours calculation (using order creation time)
+            const hour = new Date(order.created_at).getHours();
+            hourMap.set(hour, (hourMap.get(hour) || 0) + 1);
+        });
+
+        // Attention time calculation
+        let totalAttentionTimeMs = 0;
+        let attentionCount = 0;
+        sessions?.forEach(session => {
+            if (session.start_time && session.end_time) {
+                const start = new Date(session.start_time).getTime();
+                const end = new Date(session.end_time).getTime();
+                const duration = end - start;
+                if (duration > 0) {
+                    totalAttentionTimeMs += duration;
+                    attentionCount++;
+                }
+            }
         });
 
         const topProducts: TopProduct[] = Array.from(productMap.entries())
@@ -75,11 +136,19 @@ export class ReportService {
             .sort((a, b) => b.quantity - a.quantity)
             .slice(0, 5);
 
+        const peakHours = Array.from({ length: 24 }, (_, i) => ({
+            hour: i,
+            count: hourMap.get(i) || 0
+        }));
+
         return {
             totalSales,
             orderCount,
             averageTicket: orderCount > 0 ? totalSales / orderCount : 0,
-            topProducts
+            topProducts,
+            avgAttentionTime: attentionCount > 0 ? (totalAttentionTimeMs / attentionCount) / (1000 * 60) : 0,
+            avgPrepTime: prepCount > 0 ? (totalPrepTimeMs / prepCount) / (1000 * 60) : 0,
+            peakHours
         };
     }
 }
