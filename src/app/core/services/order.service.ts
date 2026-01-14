@@ -148,23 +148,17 @@ export class OrderService {
         }
 
         console.log(`[OrderService] Active session found: ${tableData.current_session_id}`);
-        // 2. Get Orders for this session OR orders for this table without session (orphan orders)
-        // Ensure we handle the case where session_id might be null in the filter string
-        const sessionFilter = tableData.current_session_id
-            ? `session_id.eq.${tableData.current_session_id},session_id.is.null`
-            : `session_id.is.null`;
 
-        console.log(`[OrderService] Using session filter: ${sessionFilter} for table: ${resolvedTableId}`);
-
+        // 2. Get Orders ONLY for the current session
         const { data: orders, error: ordersError } = await this.supabase.client
             .from('orders')
             .select('id, created_at, status')
             .eq('table_id', resolvedTableId)
-            .or(sessionFilter)
+            .eq('session_id', tableData.current_session_id)
             .neq('status', 'cancelled')
             .neq('status', 'paid');
 
-        console.log(`[OrderService] Found ${orders?.length || 0} active orders for table ${resolvedTableId}`);
+        console.log(`[OrderService] Found ${orders?.length || 0} active orders for current session ${tableData.current_session_id}`);
         if (ordersError || !orders || orders.length === 0) return [];
 
         const orderIds = orders.map(o => o.id);
