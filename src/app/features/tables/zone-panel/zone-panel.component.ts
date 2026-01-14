@@ -66,7 +66,7 @@ export class ZonePanelComponent implements OnInit {
       this.filteredZones = zones;
     });
     // Auto-seed if empty
-    this.zoneService.checkAndSeedZones();
+    this.zoneService.ensureZonesExist();
   }
 
   private getStats(): Observable<StatItem[]> {

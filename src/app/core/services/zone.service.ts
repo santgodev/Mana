@@ -142,53 +142,29 @@ export class ZoneService {
     });
   }
   // Auto-seed for development/recovery
-  async checkAndSeedZones() {
-    console.log('Checking zones for seeding...');
-
-    // Check if zones exist
-    const { count, error: countError } = await this.supabase.client
+  async ensureZonesExist() {
+    const { count, error } = await this.supabase.client
       .from('zones')
       .select('*', { count: 'exact', head: true });
 
-    if (countError) {
-      console.error('Error checking zones:', countError);
+    if (error) {
+      console.error('Error checking zones:', error);
       return;
     }
 
     if (count === 0) {
-      console.log('No zones found. Attempting to seed...');
-
-      const fullZones = [
+      const zonesToSeed = [
         { name: 'Salón Principal', type: 'indoor', capacity: 40, active: true, floor: 1 },
         { name: 'Terraza', type: 'outdoor', capacity: 20, active: true, floor: 1 },
         { name: 'VIP', type: 'private', capacity: 10, active: true, floor: 2 }
       ];
 
-      // Try full seed first
-      const { error: fullError } = await this.supabase.client.from('zones').insert(fullZones);
+      const { error: seedError } = await this.supabase.client.from('zones').insert(zonesToSeed).select();
 
-      if (fullError) {
-        console.warn('Full seed failed (likely schema mismatch). Attempting minimal seed...', fullError);
-
-        // Fallback: Minimal seed (just names)
-        const minimalZones = [
-          { name: 'Salón Principal' },
-          { name: 'Terraza' },
-          { name: 'VIP' }
-        ];
-
-        const { error: minError } = await this.supabase.client.from('zones').insert(minimalZones);
-
-        if (minError) {
-          console.error('Minimal seed also failed:', minError);
-          console.error(`Error creating zones: ${minError.message || minError.details || JSON.stringify(minError)}`);
-        } else {
-          console.log('Minimal zones seeded successfully.');
-          console.warn('Zones created with limited data. Your database schema may need updates (missing columns like "type" or "capacity").');
-          this.loadZones();
-        }
+      if (seedError) {
+        console.error('Error seeding zones:', seedError);
+        console.error(`Error creating zones: ${seedError.message || seedError.details || JSON.stringify(seedError)}`);
       } else {
-        console.log('Zones seeded successfully with full data.');
         this.loadZones();
       }
     }

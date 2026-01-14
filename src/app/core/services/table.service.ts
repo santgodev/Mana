@@ -31,7 +31,6 @@ export class TableService {
       .order('number');
 
     if (data) {
-      console.log('Tables loaded from DB:', data);
       this._tables.next(data as Table[]);
     } else if (error) {
       console.error('Error loading tables:', error);
@@ -44,8 +43,7 @@ export class TableService {
     this.tableSubscription = this.supabase.client
       .channel('public:tables')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'tables' }, (payload: any) => {
-        console.log('Table update received:', payload);
-        this.handleRealtimeUpdate(payload);
+        this.loadTables();
       })
       .subscribe();
   }
@@ -121,7 +119,6 @@ export class TableService {
 
       if (tableData?.current_session_id) {
         sessionId = tableData.current_session_id;
-        console.log('[TableService] Resolved missing sessionId:', sessionId);
       }
     }
 

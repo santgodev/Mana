@@ -73,23 +73,6 @@ export class KitchenBoardComponent implements OnInit, OnDestroy {
 
         this.sub.add(
             this.kitchenService.orders$.subscribe(orders => {
-                console.log('📦 DEBUG COCINA - Pedidos Recibidos:', orders);
-                // Safe debug logging with type casting
-                if (orders.length > 0) {
-                    const firstOrder = orders[0] as any;
-                    console.log('🐞 DIAGNÓSTICO DE PEDIDO:', firstOrder.id);
-                    if (firstOrder.order_items) {
-                        firstOrder.order_items.forEach((item: any) => {
-                            const cats = item.products?.categories;
-                            console.log(`   🛒 Producto: ${item.products?.name}`);
-                            console.log(`      Categoría Raw:`, cats);
-                            const stId = (Array.isArray(cats) && cats.length > 0) ? cats[0].station_id : cats?.station_id;
-                            console.log(`      Station ID en Item: '${stId}'`);
-                            console.log(`      Station ID Seleccionada: '${this.selectedStationId}'`);
-                            console.log(`      ¿MATCH? ${stId === this.selectedStationId}`);
-                        });
-                    }
-                }
                 this.rawOrders = orders;
                 this.filterOrders();
             })
@@ -111,15 +94,10 @@ export class KitchenBoardComponent implements OnInit, OnDestroy {
         // Update handling for both Chips and Select
         const newValue = event.value !== undefined ? event.value : (event.option ? event.option.value : this.selectedStationId);
         this.selectedStationId = newValue;
-
-        console.log('🔄 CAMBIO DE ESTACIÓN:', this.selectedStationId);
         this.filterOrders();
     }
 
     filterOrders() {
-        console.log('🧹 Filtrando pedidos para estación:', this.selectedStationId);
-        console.log('   Pedidos Raw Disponibles:', this.rawOrders.length);
-
         if (this.selectedStationId === 'all') {
             this.orders = this.sortOrders([...this.rawOrders]);
             return;
@@ -127,22 +105,12 @@ export class KitchenBoardComponent implements OnInit, OnDestroy {
 
         // Filter orders that have AT LEAST one item for this station
         const stationOrders = this.rawOrders.filter(order => {
-            // Debug each order check
             const hasItem = order.order_items.some((item: any) => {
-                const match = this.isItemForCurrentStation(item);
-                // Only log failures if we expected success (e.g. valid product)
-                if (item.products?.name?.includes('Cerveza') || item.products?.name?.includes('Test')) {
-                    console.log(`🧐 DEBUG CHECK: ${item.products?.name}`);
-                    console.log(`   Station Esperada: ${this.selectedStationId}`);
-                    console.log(`   Categoría Objeto:`, item.products?.categories);
-                    console.log(`   Es Match?: ${match}`);
-                }
-                return match;
+                return this.isItemForCurrentStation(item);
             });
             return hasItem;
         });
 
-        console.log('   Resultado filtro:', stationOrders.length);
         this.orders = this.sortOrders(stationOrders);
     }
 

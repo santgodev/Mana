@@ -209,10 +209,6 @@ export class ProductFormComponent implements OnInit {
   }
 
   async onSubmit() {
-    console.log('ProductFormComponent: onSubmit called');
-    console.log('Form Status:', this.productForm.status);
-    console.log('Form Value:', this.productForm.value);
-
     if (this.productForm.invalid) {
       console.warn('ProductFormComponent: Form is invalid');
       // Log generic errors

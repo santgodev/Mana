@@ -87,8 +87,7 @@ export class ProductService {
         this.productSub = this.supabase.client
             .channel('public:products')
             .on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, (payload) => {
-                console.log('Product change received:', payload);
-                this.handleProductUpdate(payload);
+                this.loadProducts();
             })
             .subscribe();
 
@@ -96,7 +95,6 @@ export class ProductService {
         this.categorySub = this.supabase.client
             .channel('public:categories')
             .on('postgres_changes', { event: '*', schema: 'public', table: 'categories' }, (payload) => {
-                console.log('Category change received:', payload);
                 this.loadCategories(); // Simpler for categories as there are few
             })
             .subscribe();
@@ -105,21 +103,17 @@ export class ProductService {
     private handleProductUpdate(payload: any) {
         const current = this._products.value;
         if (payload.eventType === 'INSERT') {
-            console.log('[ProductService] Adding new product:', payload.new.name);
             this._products.next([...current, payload.new as Product]);
         } else if (payload.eventType === 'UPDATE') {
-            console.log('[ProductService] Updating product:', payload.new.name, 'Stock:', payload.new.stock);
-            const updated = current.map((p: Product) => p.id === payload.new.id ? { ...p, ...payload.new } : p);
-            this._products.next(updated as Product[]);
+            const updated = current.map(p => p.id === payload.new.id ? payload.new as Product : p);
+            this._products.next(updated);
         } else if (payload.eventType === 'DELETE') {
             const deletedId = payload.old.id;
-            console.log('[ProductService] Deleting product id:', deletedId);
             this._products.next(current.filter((p: Product) => p.id !== deletedId));
         }
     }
 
-    async createProduct(product: Partial<Product>) {
-        console.log('ProductService: Creating product...', product);
+    async createProduct(product: Partial<Product>): Promise<Product | null> {
         const { id, created_at, ...newProduct } = product as any;
         if (newProduct.category_id === '') {
             newProduct.category_id = null;
@@ -134,14 +128,7 @@ export class ProductService {
             console.error('ProductService: Error inserting product', error);
             throw error;
         }
-
-        console.log('ProductService: Product created successfully', data);
-
-        if (data) {
-            const current = this._products.value;
-            this._products.next([...current, data as Product]);
-        }
-        return data;
+        return data as Product;
     }
 
     async updateProduct(id: string, updates: Partial<Product>) {

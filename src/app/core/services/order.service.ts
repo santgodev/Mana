@@ -42,7 +42,6 @@ export class OrderService {
 
         // 2. AUTO-OPEN: If table is free, create a session
         if (tableData.status === 'free' || !pSessionId) {
-            console.log(`[OrderService] Table ${tableId} is free or has no session. Starting new session...`);
             const { data: newSession, error: sessionErr } = await this.supabase.client
                 .from('table_sessions')
                 .insert({
@@ -63,7 +62,6 @@ export class OrderService {
                         current_session_id: pSessionId
                     })
                     .eq('id', resolvedTableId);
-                console.log(`[OrderService] Table ${tableId} is now OCCUPIED with session ${pSessionId}`);
             } else {
                 // Failed to auto-start session
             }
@@ -89,7 +87,6 @@ export class OrderService {
         if (!orderData) throw new Error('Order creation failed returning no data');
 
         const orderId = orderData.id;
-        console.log(`[OrderService] Order created: ${orderId} for session: ${pSessionId}`);
 
         // 3. Create Order Items
         const itemsToInsert = cart.map(item => ({
@@ -126,7 +123,6 @@ export class OrderService {
             .single();
 
         const resolvedTableId = tableData?.id || tableId;
-        console.log(`[OrderService] Getting active items for table: ${resolvedTableId}`);
 
         if (tableError || !tableData?.current_session_id) {
             console.warn(`[OrderService] Table ${tableId} has no current_session_id in DB. Using fallback for table UUID: ${resolvedTableId}`);
@@ -141,13 +137,10 @@ export class OrderService {
                 .order('created_at', { ascending: false })
                 .limit(20);
 
-            console.log(`[OrderService] Fallback query returned ${fallbackOrders?.length || 0} orders.`);
             if (fbError || !fallbackOrders || fallbackOrders.length === 0) return [];
             const orderIds = fallbackOrders.map(o => o.id);
             return this.fetchItemsByIds(orderIds);
         }
-
-        console.log(`[OrderService] Active session found: ${tableData.current_session_id}`);
 
         // 2. Get Orders ONLY for the current session
         const { data: orders, error: ordersError } = await this.supabase.client
@@ -158,7 +151,6 @@ export class OrderService {
             .neq('status', 'cancelled')
             .neq('status', 'paid');
 
-        console.log(`[OrderService] Found ${orders?.length || 0} active orders for current session ${tableData.current_session_id}`);
         if (ordersError || !orders || orders.length === 0) return [];
 
         const orderIds = orders.map(o => o.id);

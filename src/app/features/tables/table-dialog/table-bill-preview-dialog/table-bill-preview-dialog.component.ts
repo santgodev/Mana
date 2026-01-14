@@ -190,10 +190,8 @@ export class TableBillPreviewDialogComponent implements OnInit {
   ) { }
 
   async ngOnInit() {
-    console.log('[TableBillPreview] Initializing for table:', this.data.table.number, this.data.table.id);
     try {
       this.items = await this.orderService.getActiveOrderItems(this.data.table.id);
-      console.log('[TableBillPreview] Loaded items:', this.items.length);
       this.calculateTotal();
     } catch (error) {
       console.error('[TableBillPreview] Error loading bill preview', error);

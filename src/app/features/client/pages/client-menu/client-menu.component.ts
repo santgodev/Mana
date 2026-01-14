@@ -266,11 +266,10 @@ export class ClientMenuComponent implements OnInit {
       await this.productService.loadProducts();
       this.productService.products$.subscribe((prods: Product[]) => {
         // PERMISSIVE FILTER: handles isAvailable or Stock nulls
-        this.products = prods.filter(p =>
-          p.is_available !== false &&
-          (p.stock === null || p.stock === undefined || p.stock > 0)
-        );
-        console.log(`[ClientMenu] Displayed ${this.products.length} of ${prods.length} products`);
+        this.products = prods.filter(p => {
+          return (p.is_available === true || p.is_available === null) &&
+            (p.stock === null || p.stock === undefined || p.stock > 0);
+        });
         this.isLoading = false;
       });
     } catch (error) {
